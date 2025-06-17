@@ -37,6 +37,8 @@
       type(file_desc_t)     :: pio_FileDesc
       !> @brief An io descriptor handle that is generated in @ref PIO_initdecomp.
       type(io_desc_t)       :: pio_desc_2D_r
+      type(io_desc_t)       :: pio_desc_2D_u
+      type(io_desc_t)       :: pio_desc_2D_v
       type(io_desc_t)       :: pio_desc_3D_r
       type(io_desc_t)       :: pio_desc_4D_r
       !> @brief Specifies the flavor of netCDF output.
@@ -50,7 +52,9 @@
       integer, dimension(3) :: pio_dimLen_3D_v
       integer, dimension(4) :: pio_dimLen_4D_r
 
-      integer, public :: pio_xi_start, pio_eta_start, pio_s_start
+      integer, public :: pio_xi_rho_start, pio_eta_rho_start
+      integer, public :: pio_xi_u_start, pio_eta_v_start
+      integer, public :: pio_s_start
 
       !> @brief Array describing the decomposition of the data.
       integer, allocatable  :: pio_fcompdof_2D_r(:)
@@ -73,6 +77,8 @@
 
       !! This subroutine reads the data array from the netCDF input file.
       public  :: pio_ncread
+      public  :: pio_ncread_u
+      public  :: pio_ncread_v
       public  :: pio_ncread3
 
 !! WRITER
@@ -183,19 +189,39 @@
         integer :: i,j,k
         integer :: wbuf, tmp_idx
 
+        ! 2D rho points
         do j=1,eta_rho
           do i=1,xi_rho
-            wbuf = (pio_eta_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_start - 1 + i)
+            wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_rho_start - 1 + i)
             tmp_idx = (j - 1) * xi_rho + i
             pio_fcompdof_2D_r(tmp_idx) = wbuf
           end do
         end do
 
+        ! 2D u points
+        do j=1,eta_rho
+          do i=1,xi_u
+            wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_u(1) + (pio_xi_u_start - 1 + i)
+            tmp_idx = (j - 1) * xi_u + i
+            pio_fcompdof_2D_u(tmp_idx) = wbuf
+          end do
+        end do
+
+        ! 2D v points
+        do j=1,eta_v
+          do i=1,xi_rho
+            wbuf = (pio_eta_v_start - 1 + j - 1) * pio_dimLen_2D_v(1) + (pio_xi_rho_start - 1 + i)
+            tmp_idx = (j - 1) * xi_rho + i
+            pio_fcompdof_2D_v(tmp_idx) = wbuf
+          end do
+        end do
+
+        ! 3D rho points
         do k=1,N
           do j=1,eta_rho
             do i=1,xi_rho
               wbuf = (pio_s_start - 1 + k - 1) * (pio_dimLen_3D_r(1)*pio_dimLen_3D_r(2)) +
-     &               (pio_eta_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_start - 1 + i)
+     &               (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_rho_start - 1 + i)
               tmp_idx = (k - 1) * ( xi_rho * eta_rho) + (j - 1) * xi_rho + i
               pio_fcompdof_3D_r(tmp_idx) = wbuf
             end do
@@ -210,6 +236,10 @@
 
         call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_r, pio_fcompdof_2D_r,
      &       pio_desc_2D_r)
+        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_u, pio_fcompdof_2D_u,
+     &       pio_desc_2D_u)
+        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_v, pio_fcompdof_2D_v,
+     &       pio_desc_2D_v)
         call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_r, pio_fcompdof_3D_r,
      &       pio_desc_3D_r)
 
@@ -234,6 +264,48 @@
      &  arr, ierr)
 
       end subroutine pio_ncread
+
+! ----------------------------------------------------------------------
+      subroutine pio_ncread_u(fname, varName, arr)
+
+        implicit none
+
+        character(len=*) :: fname
+        character(len=*) :: varName
+        real,dimension(:,:),intent(inout)   :: arr ! array to be filled
+
+        type(var_desc_t) :: varId
+        integer :: ierr
+
+        ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname))
+
+        ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+
+        call PIO_read_darray(pio_FileDesc, varId, pio_desc_2D_u,
+     &  arr, ierr)
+
+      end subroutine pio_ncread_u
+
+! ----------------------------------------------------------------------
+      subroutine pio_ncread_v(fname, varName, arr)
+
+        implicit none
+
+        character(len=*) :: fname
+        character(len=*) :: varName
+        real,dimension(:,:),intent(inout)   :: arr ! array to be filled
+
+        type(var_desc_t) :: varId
+        integer :: ierr
+
+        ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname))
+
+        ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+
+        call PIO_read_darray(pio_FileDesc, varId, pio_desc_2D_v,
+     &  arr, ierr)
+
+      end subroutine pio_ncread_v
 
 ! ----------------------------------------------------------------------
       subroutine pio_ncread3(fname, varName, arr)

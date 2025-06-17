@@ -34,6 +34,7 @@
       integer :: req_rec, tindx, max_rec, record, ncid, varid, i, j, k,
      &           ierr,  start(4), count(2), ibuff(iaux),
      &           checkdims , itrc
+      integer :: ierr_bcast
       real    :: time_scale
       integer :: init_type, tile=0 ! set tile to zero for compute_tile_bounds.h below. Needed to fixed closed boundaries.
       integer, parameter :: init_run=1,  rst_run=2
@@ -78,7 +79,9 @@ c--#define VERBOSE
       init_type=0
       ierr=nf90_open(ininame, nf90_nowrite, ncid)
       if (ierr == nf90_noerr) then
+#ifndef PIO ! skip checkdims if we are using only one input file
         ierr=checkdims (ncid, ininame, max_rec)
+#endif
         if (ierr == nf90_noerr) then
           if (max_rec > 0) then
             if (req_rec > 0) then
@@ -103,6 +106,7 @@ c--#define VERBOSE
      &                'open netCDF file ''', trim(ininame), '''.',
      &                                             nf90_strerror(ierr)
       endif
+
       if (ierr /= nf90_noerr) goto 99                     !--> ERROR
 
 ! Read in evolving model variables:
@@ -317,15 +321,27 @@ c--#define VERBOSE
 
       start=1; start(3)=record                                       ! 2D vars
 
+#ifdef PIO
+      call pio_ncread('roms_ini_MARBL2.nc', 'zeta', zeta(i0:i1,j0:j1,1))
+#else
       call ncread(ncid,'zeta',zeta(i0:i1,j0:j1,1),start)
+#endif
       zeta(i0:i1,j0:j1,1)=zeta(i0:i1,j0:j1,1)*rmask(i0:i1,j0:j1)
       call exchange_xxx(zeta(:,:,1))
 
+#ifdef PIO
+      call pio_ncread_u('roms_ini_MARBL2.nc', 'ubar', ubar(1:i1,j0:j1,1))
+#else
       call ncread(ncid,'ubar',ubar( 1:i1,j0:j1,1),start)
+#endif
       ubar(1:i1,j0:j1,1) = ubar(1:i1,j0:j1,1)*umask(1:i1,j0:j1)
       call exchange_xxx(ubar(:,:,1))
 
+#ifdef PIO
+      call pio_ncread_v('roms_ini_MARBL2.nc', 'vbar', vbar(i0:i1,1:j1,1))
+#else
       call ncread(ncid,'vbar',vbar(i0:i1, 1:j1,1),start)
+#endif
       vbar(i0:i1,1:j1,1) = vbar(i0:i1,1:j1,1)*vmask(i0:i1,1:j1)
       call exchange_xxx(vbar(:,:,1))
 
