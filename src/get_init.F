@@ -322,7 +322,7 @@ c--#define VERBOSE
       start=1; start(3)=record                                       ! 2D vars
 
 #ifdef PIO
-      call pio_ncread('roms_ini_MARBL2.nc', 'zeta', zeta(i0:i1,j0:j1,1))
+      call pio_ncread2(ininame, 'zeta', zeta(i0:i1,j0:j1,1), 0, '2D_r')
 #else
       call ncread(ncid,'zeta',zeta(i0:i1,j0:j1,1),start)
 #endif
@@ -330,7 +330,7 @@ c--#define VERBOSE
       call exchange_xxx(zeta(:,:,1))
 
 #ifdef PIO
-      call pio_ncread_u('roms_ini_MARBL2.nc', 'ubar', ubar(1:i1,j0:j1,1))
+      call pio_ncread2(ininame, 'ubar', ubar(1:i1,j0:j1,1), 0, '2D_u')
 #else
       call ncread(ncid,'ubar',ubar( 1:i1,j0:j1,1),start)
 #endif
@@ -338,7 +338,7 @@ c--#define VERBOSE
       call exchange_xxx(ubar(:,:,1))
 
 #ifdef PIO
-      call pio_ncread_v('roms_ini_MARBL2.nc', 'vbar', vbar(i0:i1,1:j1,1))
+      call pio_ncread2(ininame, 'vbar', vbar(i0:i1,1:j1,1), 0, '2D_v')
 #else
       call ncread(ncid,'vbar',vbar(i0:i1, 1:j1,1),start)
 #endif
@@ -363,10 +363,17 @@ c--#define VERBOSE
           if (ierr == nf90_noerr) then
             ierr=nf90_inq_varid(ncid, 'DV_avg_bak', varid)
             if (ierr == nf90_noerr) then
+#ifdef PIO
+              call pio_ncread2(ininame, 'DU_avg2', DU_avg2(1:i1,j0:j1), 0, '2D_u')
+              call pio_ncread2(ininame, 'DV_avg2', DV_avg2(i0:i1,1:j1), 0, '2D_v')
+              call pio_ncread2(ininame, 'DU_avg_bak', DU_avg_bak(1:i1,j0:j1), 0, '2D_u')
+              call pio_ncread2(ininame, 'DV_avg_bak', DV_avg_bak(i0:i1,1:j1), 0, '2D_v')
+#else
               call ncread(ncid,'DU_avg2',      DU_avg2( 1:i1,j0:j1),start)
               call ncread(ncid,'DV_avg2',      DV_avg2(i0:i1, 1:j1),start)
               call ncread(ncid,'DU_avg_bak',DU_avg_bak( 1:i1,j0:j1),start)
               call ncread(ncid,'DV_avg_bak',DV_avg_bak(i0:i1, 1:j1),start)
+#endif
               if (ierr /= nf90_noerr) goto 99                  !--> ERROR
             else
               forw_start=ntstart      !--> cancel exact restart
@@ -386,9 +393,13 @@ c--#define VERBOSE
       if (ierr == nf90_noerr) then
         ierr=nf90_inq_varid(ncid,  'rvfrc_bak', varid)
         if (ierr == nf90_noerr) then
-
+#ifdef PIO
+          call pio_ncread2(ininame, 'rufrc_bak', rufrc_bak(1:i1,j0:j1,tindx), 0, '2D_u')
+          call pio_ncread2(ininame, 'rvfrc_bak', rvfrc_bak(i0:i1,1:j1,tindx), 0, '2D_v')
+#else
           call ncread(ncid,'rufrc_bak', rufrc_bak( 1:i1,j0:j1,tindx),start)    ! DevinD this update was untested
           call ncread(ncid,'rvfrc_bak', rvfrc_bak(i0:i1, 1:j1,tindx),start)
+#endif
           if (ierr /= nf90_noerr) goto 99                     !--> ERROR
 
         else
@@ -403,14 +414,21 @@ c--#define VERBOSE
 ! 3D momentum components in XI- and ETA-directions
 
       start=1; start(4)=record                                       ! 3D vars
-
+#ifdef PIO
+      call pio_ncread3(ininame, vname(1,indxU), u(1:i1,j0:j1,:,tindx), 0, '3D_u')
+#else
       call ncread(ncid,vname(1,indxU), u(1:i1,j0:j1,:,tindx),start)
+#endif
       do k=1,nz
         u(1:i1,j0:j1,k,tindx) = u(1:i1,j0:j1,k,tindx)*umask(1:i1,j0:j1)
       enddo
       call exchange_xxx(u(:,:,:,tindx) )
 
+#ifdef PIO
+      call pio_ncread3(ininame, vname(1,indxV), v(i0:i1,1:j1,:,tindx), 0, '3D_v')
+#else
       call ncread(ncid,vname(1,indxV), v(i0:i1, 1:j1,:,tindx),start)           ! v requires masking and
+#endif
        do k=1,nz
          v(i0:i1,1:j1,k,tindx) = v(i0:i1,1:j1,k,tindx)*vmask(i0:i1,1:j1)
        enddo
@@ -437,12 +455,6 @@ c--#define VERBOSE
 
 ! Tracer variables.
 
-#ifdef PIO
-      call pio_ncread3('roms_ini_MARBL2.nc', 'temp', t(i0:i1,j0:j1,:,tindx,1))
-          do k=1,N
-            t(i0:i1,j0:j1,k,tindx,1)=t(i0:i1,j0:j1,k,tindx,1)*rmask(i0:i1,j0:j1)
-          enddo
-          call exchange_xxx(t(:,:,:,tindx,1) )
 !      if (mynode == 1) then
 !      print *, "pio", t(i0:i1,j0:j1,1,tindx,1)
 !      endif
@@ -450,13 +462,14 @@ c--#define VERBOSE
 !      if (mynode == 1) then
 !      print *, "not", t(i0:i1,j0:j1,1,tindx,1)
 !      endif
-      do itrc=2,nt
-#else
       do itrc=1,nt
-#endif
         ierr=nf90_inq_varid(ncid, t_vname(itrc), varid)
         if (ierr == nf90_noerr) then
+#ifdef PIO
+          call pio_ncread3(ininame, t_vname(itrc), t(i0:i1,j0:j1,:,tindx,itrc), 0, '3D_r')
+#else
           call ncread(ncid, t_vname(itrc), t(i0:i1,j0:j1,:,tindx,itrc), start)
+#endif
           do k=1,N
             t(i0:i1,j0:j1,k,tindx,itrc)=t(i0:i1,j0:j1,k,tindx,itrc)*rmask(i0:i1,j0:j1)
           enddo
@@ -482,7 +495,11 @@ c--#define VERBOSE
 # ifdef LMD_KPP
       ierr=nf90_inq_varid(ncid, vname(1,indxHbls), varid)
       if (ierr == nf90_noerr) then
-        call ncread(ncid,vname(1,indxHbls),hbls(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
+#ifdef PIO
+      call pio_ncread2(ininame,vname(1,indxHbls), hbls(i0:i1,j0:j1), 0, '2D_r')
+#else
+      call ncread(ncid,vname(1,indxHbls),hbls(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
+#endif
         hbls(i0:i1,j0:j1)=hbls(i0:i1,j0:j1)*rmask(i0:i1,j0:j1)     ! output mask 0, rather than random numbers
         call exchange_xxx(hbls(:,:) )
       else
@@ -495,7 +512,11 @@ c--#define VERBOSE
 # ifdef LMD_BKPP
       ierr=nf90_inq_varid(ncid, vname(1,indxHbbl), varid)
       if (ierr == nf90_noerr) then
-        call ncread(ncid,vname(1,indxHbbl),hbbl(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
+#ifdef PIO
+      call pio_ncread2(ininame,vname(1,indxHbbl), hbbl(i0:i1,j0:j1), 0, '2D_r')
+#else
+      call ncread(ncid,vname(1,indxHbbl),hbbl(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
+#endif
         hbbl(i0:i1,j0:j1)=hbbl(i0:i1,j0:j1)*rmask(i0:i1,j0:j1)     ! output mask 0, rather than random numbers
         call exchange_xxx(hbbl(:,:) )            ! confirmed needs an exchange, not sure why
       else
