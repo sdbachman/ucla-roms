@@ -228,47 +228,80 @@
 
       end subroutine pio_initialize
 ! ----------------------------------------------------------------------
-      subroutine pio_storage_to_memory(irec, gtype)
+      subroutine pio_storage_to_memory(gtype, irec)
 
         implicit none
 
-        integer,intent(in)            :: irec
-        character(len=4),intent(in)   :: gtype ! ('2D_','3D_') + ('u','v','r','ut','vt','rt')
+        character(len=4),intent(in)   :: gtype ! ('2D_','3D_') + ('u','v','r')
+        integer,optional,intent(in)       :: irec
 
         integer :: i,j,k
         integer :: wbuf, tmp_idx
 
         ! 2D rho points
         if (gtype=='2D_r') then
-          do j=1,eta_rho
-            do i=1,xi_rho
-              wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_rho_start - 1 + i)
-              tmp_idx = (j - 1) * xi_rho + i
-              pio_fcompdof_2D_r(tmp_idx) = wbuf
+          if (.not.present(irec)) then
+            do j=1,eta_rho
+              do i=1,xi_rho
+                wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_r(1) + (pio_xi_rho_start - 1 + i)
+                tmp_idx = (j - 1) * xi_rho + i
+                pio_fcompdof_2D_r(tmp_idx) = wbuf
+              end do
             end do
-          end do
+          else
+            do j=1,eta_rho
+              do i=1,xi_rho
+                wbuf = (pio_dimLen_2D_rt(1)*pio_dimLen_2D_rt(2))*(irec-1) +
+     &           (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_rt(1) + (pio_xi_rho_start - 1 + i)
+                tmp_idx = (j - 1) * xi_rho + i
+                pio_fcompdof_2D_rt(tmp_idx) = wbuf
+              enddo
+            enddo
+          endif
         endif
 
         ! 2D u points
         if (gtype=='2D_u') then
-          do j=1,eta_rho
-            do i=1,xi_u
-              wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_u(1) + (pio_xi_u_start - 1 + i)
-              tmp_idx = (j - 1) * xi_u + i
-              pio_fcompdof_2D_u(tmp_idx) = wbuf
+          if (.not.present(irec)) then
+            do j=1,eta_rho
+              do i=1,xi_u
+                wbuf = (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_u(1) + (pio_xi_u_start - 1 + i)
+                tmp_idx = (j - 1) * xi_u + i
+                pio_fcompdof_2D_u(tmp_idx) = wbuf
+              end do
             end do
-          end do
+          else
+            do j=1,eta_rho
+              do i=1,xi_u
+                wbuf = (pio_dimLen_2D_ut(1)*pio_dimLen_2D_ut(2))*(irec-1) +
+     &           (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_ut(1) + (pio_xi_u_start - 1 + i)
+                tmp_idx = (j - 1) * xi_u + i
+                pio_fcompdof_2D_ut(tmp_idx) = wbuf
+              end do
+            end do
+          endif
         endif
 
         ! 2D v points
         if (gtype=='2D_v') then
-          do j=1,eta_v
-            do i=1,xi_rho
-              wbuf = (pio_eta_v_start - 1 + j - 1) * pio_dimLen_2D_v(1) + (pio_xi_rho_start - 1 + i)
-              tmp_idx = (j - 1) * xi_rho + i
-              pio_fcompdof_2D_v(tmp_idx) = wbuf
+          if (.not.present(irec)) then
+            do j=1,eta_v
+              do i=1,xi_rho
+                wbuf = (pio_eta_v_start - 1 + j - 1) * pio_dimLen_2D_v(1) + (pio_xi_rho_start - 1 + i)
+                tmp_idx = (j - 1) * xi_rho + i
+                pio_fcompdof_2D_v(tmp_idx) = wbuf
+              end do
             end do
-          end do
+          else
+            do j=1,eta_v
+              do i=1,xi_rho
+                wbuf = (pio_dimLen_2D_vt(1)*pio_dimLen_2D_vt(2))*(irec-1) +
+     &           (pio_eta_v_start - 1 + j - 1) * pio_dimLen_2D_vt(1) + (pio_xi_rho_start - 1 + i)
+                tmp_idx = (j - 1) * xi_rho + i
+                pio_fcompdof_2D_vt(tmp_idx) = wbuf
+              end do
+            end do
+          endif
         endif
 
         ! 3D rho points
@@ -313,118 +346,114 @@
           end do
         endif
 
-        ! 2D rho points with time variable
-        if (gtype=='2D_rt') then
-          do j=1,eta_rho
-            do i=1,xi_rho
-              wbuf = (pio_dimLen_2D_rt(1)*pio_dimLen_2D_rt(2))*(irec-1) +
-     &         (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_rt(1) + (pio_xi_rho_start - 1 + i)
-              tmp_idx = (j - 1) * xi_rho + i
-              pio_fcompdof_2D_rt(tmp_idx) = wbuf
-            end do
-          end do
-        endif
-
-        ! 2D u points with time variable
-        if (gtype=='2D_ut') then
-          do j=1,eta_rho
-            do i=1,xi_u
-              wbuf = (pio_dimLen_2D_ut(1)*pio_dimLen_2D_ut(2))*(irec-1) +
-     &         (pio_eta_rho_start - 1 + j - 1) * pio_dimLen_2D_ut(1) + (pio_xi_u_start - 1 + i)
-              tmp_idx = (j - 1) * xi_u + i
-              pio_fcompdof_2D_ut(tmp_idx) = wbuf
-            end do
-          end do
-        endif
-
-        ! 2D v points with time variable
-        if (gtype=='2D_vt') then
-          do j=1,eta_v
-            do i=1,xi_rho
-              wbuf = (pio_dimLen_2D_vt(1)*pio_dimLen_2D_vt(2))*(irec-1) +
-     &         (pio_eta_v_start - 1 + j - 1) * pio_dimLen_2D_vt(1) + (pio_xi_rho_start - 1 + i)
-              tmp_idx = (j - 1) * xi_rho + i
-              pio_fcompdof_2D_vt(tmp_idx) = wbuf
-            end do
-          end do
-        endif
-
       end subroutine pio_storage_to_memory
 ! ----------------------------------------------------------------------
-      subroutine pio_createDecomp(irec, gtype)
+      subroutine pio_createDecomp(gtype, irec)
 
         implicit none
 
-        integer,intent(in)            :: irec
         character(len=4),intent(in)   :: gtype ! ('2D_','3D_') + ('u','v','r')
+        integer,optional,intent(in)       :: irec
 
         if (gtype=='2D_r') then
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_r, pio_fcompdof_2D_r,
-     &       pio_desc_2D_r)
-        elseif (gtype=='2D_u') then
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_u, pio_fcompdof_2D_u,
-     &       pio_desc_2D_u)
-        elseif (gtype=='2D_v') then
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_v, pio_fcompdof_2D_v,
-     &       pio_desc_2D_v)
-        elseif (gtype=='3D_r') then
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_r, pio_fcompdof_3D_r,
+          if (.not.present(irec)) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_r, pio_fcompdof_2D_r,
+     &      pio_desc_2D_r)
+          else
+            pio_dimLen_2D_rt(3) = irec
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_rt, pio_fcompdof_2D_rt,
+     &      pio_desc_2D_rt)
+          endif
+        endif
+
+        if (gtype=='2D_u') then
+          if (.not.present(irec)) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_u, pio_fcompdof_2D_u,
+     &      pio_desc_2D_u)
+          else
+            pio_dimLen_2D_ut(3) = irec
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_ut, pio_fcompdof_2D_ut,
+     &      pio_desc_2D_ut)
+          endif
+        endif
+
+        if (gtype=='2D_v') then
+          if (.not.present(irec)) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_v, pio_fcompdof_2D_v,
+     &      pio_desc_2D_v)
+          else
+            pio_dimLen_2D_vt(3) = irec
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_vt, pio_fcompdof_2D_vt,
+     &      pio_desc_2D_vt)
+          endif
+        endif
+
+        if (gtype=='3D_r') then
+          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_r, pio_fcompdof_3D_r,
      &       pio_desc_3D_r)
-        elseif (gtype=='3D_u') then
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_u, pio_fcompdof_3D_u,
+        endif
+
+        if (gtype=='3D_u') then
+          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_u, pio_fcompdof_3D_u,
      &       pio_desc_3D_u)
-        elseif (gtype=='3D_v') then
+        endif
+
+        if (gtype=='3D_v') then
         call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_3D_v, pio_fcompdof_3D_v,
      &       pio_desc_3D_v)
-        elseif (gtype=='2D_rt') then
-        pio_dimLen_2D_rt(3) = irec
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_rt, pio_fcompdof_2D_rt,
-     &       pio_desc_2D_rt)
-        elseif (gtype=='2D_ut') then
-        pio_dimLen_2D_ut(3) = irec
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_ut, pio_fcompdof_2D_ut,
-     &       pio_desc_2D_ut)
-        elseif (gtype=='2D_vt') then
-        pio_dimLen_2D_vt(3) = irec
-        call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_2D_vt, pio_fcompdof_2D_vt,
-     &       pio_desc_2D_vt)
         endif
 
       end subroutine pio_createDecomp
 ! ----------------------------------------------------------------------
-      subroutine pio_ncread2(fname, varName, arr, irec, gtype)
+      subroutine pio_ncread2(fname, varName, arr, gtype, irec)
 
         implicit none
 
         character(len=*) :: fname
         character(len=*) :: varName
         real,dimension(:,:),intent(inout) :: arr ! array to be filled
-        integer,intent(in)                :: irec
-        character(len=4),intent(in)       :: gtype ! ('2D_') + ('u','v','r','ut','vt','rt')
+        character(len=4),intent(in)       :: gtype ! ('2D_') + ('u','v','r')
+        integer,optional,intent(in)       :: irec
+
 
         type(var_desc_t) :: varId
         type(io_desc_t) :: pio_desc
         integer :: ierr
 
-        call pio_storage_to_memory(irec, gtype)
-        call pio_createDecomp(irec,gtype)
+        if (present(irec)) then
+          call pio_storage_to_memory(gtype, irec)
+          call pio_createDecomp(gtype, irec)
+        else
+          call pio_storage_to_memory(gtype)
+          call pio_createDecomp(gtype)
+        endif
 
         ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname))
 
         ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
 
         if (gtype=='2D_r') then
-          pio_desc = pio_desc_2D_r
-        elseif (gtype=='2D_u') then
-          pio_desc = pio_desc_2D_u
-        elseif (gtype=='2D_v') then
-          pio_desc = pio_desc_2D_v
-        elseif (gtype=='2D_rt') then
-          pio_desc = pio_desc_2D_rt
-        elseif (gtype=='2D_ut') then
-          pio_desc = pio_desc_2D_ut
-        elseif (gtype=='2D_vt') then
-          pio_desc = pio_desc_2D_vt
+          if (.not.present(irec)) then
+            pio_desc = pio_desc_2D_r
+          else
+            pio_desc = pio_desc_2D_rt
+          endif
+        endif
+
+        if (gtype=='2D_u') then
+          if (.not.present(irec)) then
+            pio_desc = pio_desc_2D_u
+          else
+            pio_desc = pio_desc_2D_ut
+          endif
+        endif
+
+        if (gtype=='2D_v') then
+          if (.not.present(irec)) then
+            pio_desc = pio_desc_2D_v
+          else
+            pio_desc = pio_desc_2D_vt
+          endif
         endif
 
         call PIO_read_darray(pio_FileDesc, varId, pio_desc,
@@ -433,22 +462,27 @@
       end subroutine pio_ncread2
 
 ! ----------------------------------------------------------------------
-      subroutine pio_ncread3(fname, varName, arr, irec, gtype)
+      subroutine pio_ncread3(fname, varName, arr, gtype, irec)
 
         implicit none
 
         character(len=*) :: fname
         character(len=*) :: varName
         real,dimension(:,:,:),intent(inout) :: arr ! array to be filled
-        integer,intent(in)                :: irec
         character(len=4),intent(in)       :: gtype ! ('3D_') + ('u','v','r','ut','vt','rt')
+        integer,optional,intent(in)       :: irec
 
         type(var_desc_t) :: varId
         type(io_desc_t) :: pio_desc
         integer :: ierr
 
-        call pio_storage_to_memory(irec, gtype)
-        call pio_createDecomp(irec,gtype)
+        if (present(irec)) then
+          call pio_storage_to_memory(gtype, irec)
+          call pio_createDecomp(gtype, irec)
+        else
+          call pio_storage_to_memory(gtype)
+          call pio_createDecomp(gtype)
+        endif
 
         ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname))
 

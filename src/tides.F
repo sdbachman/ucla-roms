@@ -279,17 +279,17 @@
         start(3) = itide
 
         if (bry_tides) then
-!#ifdef PIO
-!          fname = "INPUT/PARTED/roms_tides.nc"  ! frcfile(var_file_indx)
-!          call pio_ncread2(fname, 'ssh_Re', ztide_r(i0:i1,j0:j1,itide), itide-1, '2D_rt')
-!          call pio_ncread2(fname, 'ssh_Im', ztide_i(i0:i1,j0:j1,itide), itide-1, '2D_rt')
+#ifdef PIO
+          fname = "INPUT/PARTED/roms_tides.nc"  ! frcfile(var_file_indx)
+          call pio_ncread2(fname, 'ssh_Re', ztide_r(i0:i1,j0:j1,itide), '2D_r', itide)
+          call pio_ncread2(fname, 'ssh_Im', ztide_i(i0:i1,j0:j1,itide), '2D_r', itide)
 
-!          call pio_ncread2(fname, 'u_Re', utide_r(1:i1,j0:j1,itide), itide, '2D_ut')
-!          call pio_ncread2(fname, 'u_Im', utide_i(1:i1,j0:j1,itide), itide, '2D_ut')
+          call pio_ncread2(fname, 'u_Re', utide_r(1:i1,j0:j1,itide), '2D_u', itide)
+          call pio_ncread2(fname, 'u_Im', utide_i(1:i1,j0:j1,itide), '2D_u', itide)
 
-!          call pio_ncread2(fname, 'v_Re', vtide_r(i0:i1,1:j1,itide), itide, '2D_vt')
-!          call pio_ncread2(fname, 'v_Im', vtide_i(i0:i1,1:j1,itide), itide, '2D_vt')
-!#else
+          call pio_ncread2(fname, 'v_Re', vtide_r(i0:i1,1:j1,itide), '2D_v', itide)
+          call pio_ncread2(fname, 'v_Im', vtide_i(i0:i1,1:j1,itide), '2D_v', itide)
+#else
           call ncread(ncid,'ssh_Re',ztide_r(i0:i1,j0:j1,itide),start)   ! read tidal elevations
           call ncread(ncid,'ssh_Im',ztide_i(i0:i1,j0:j1,itide),start)
 !         call exchange_xxx(ztide_r(:,:,itide),ztide_i(:,:,itide))
@@ -305,13 +305,13 @@
         endif
 
         if (pot_tides) then
-!#ifdef PIO
-!          call pio_ncread2(fname, 'pot_Re', ptide_r(i0:i1,j0:j1,itide), itide, '2D_rt')
-!          call pio_ncread2(fname, 'pot_Im', ptide_i(i0:i1,j0:j1,itide), itide, '2D_rt')
-!#else
+#ifdef PIO
+          call pio_ncread2(fname, 'pot_Re', ptide_r(i0:i1,j0:j1,itide), '2D_r', itide)
+          call pio_ncread2(fname, 'pot_Im', ptide_i(i0:i1,j0:j1,itide), '2D_r', itide)
+#else
           call ncread(ncid,'pot_Re',ptide_r(i0:i1,j0:j1,itide),start)
           call ncread(ncid,'pot_Im',ptide_i(i0:i1,j0:j1,itide),start)
-!#endif
+#endif
 !         call exchange_xxx(ptide_r(:,:,itide),ptide_i(:,:,itide))
         endif
 
