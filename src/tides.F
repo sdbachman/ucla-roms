@@ -8,6 +8,10 @@
       use roms_read_write
       use mpi_exchanges
       use grid
+#ifdef PIO
+      use pio_roms
+      use mpi
+#endif
 
       implicit none
 
@@ -93,7 +97,7 @@
 
 #include "compute_auxiliary_bounds.h"
 
-      if (.not.allocated(ftide)) then 
+      if (.not.allocated(ftide)) then
         call init_tides
       endif
 
@@ -238,7 +242,7 @@
       integer :: i,j
       integer :: ierr, var_file_indx, ncid, var_id, itide, found_rec
       integer,dimension(3) :: start
-
+      character(len=256) fname
 
       found_rec = 0                                        ! set found variable flag to not found
       var_file_indx = 1                                    ! forcing file index number
@@ -249,16 +253,16 @@
       do while ((found_rec==0).and.(var_file_indx <= max_frc))
 
         ierr=nf90_open(frcfile(var_file_indx), nf90_nowrite, ncid)
-        if(ierr/=0) 
+        if(ierr/=0)
      &     call handle_ierr(ierr,'tides :: opening forcing file')
 
         ierr=nf90_inq_varid(ncid, 'omega', var_id)
-        if(ierr/=0) then 
+        if(ierr/=0) then
           var_file_indx = var_file_indx +1
         else
           found_rec=1 ! Set to 1 to exit do while loop
         endif
-      enddo 
+      enddo
 
       if (found_rec==0) then
         error stop 'tides :: tide input data not found'
@@ -275,6 +279,17 @@
         start(3) = itide
 
         if (bry_tides) then
+!#ifdef PIO
+!          fname = "INPUT/PARTED/roms_tides.nc"  ! frcfile(var_file_indx)
+!          call pio_ncread2(fname, 'ssh_Re', ztide_r(i0:i1,j0:j1,itide), itide-1, '2D_rt')
+!          call pio_ncread2(fname, 'ssh_Im', ztide_i(i0:i1,j0:j1,itide), itide-1, '2D_rt')
+
+!          call pio_ncread2(fname, 'u_Re', utide_r(1:i1,j0:j1,itide), itide, '2D_ut')
+!          call pio_ncread2(fname, 'u_Im', utide_i(1:i1,j0:j1,itide), itide, '2D_ut')
+
+!          call pio_ncread2(fname, 'v_Re', vtide_r(i0:i1,1:j1,itide), itide, '2D_vt')
+!          call pio_ncread2(fname, 'v_Im', vtide_i(i0:i1,1:j1,itide), itide, '2D_vt')
+!#else
           call ncread(ncid,'ssh_Re',ztide_r(i0:i1,j0:j1,itide),start)   ! read tidal elevations
           call ncread(ncid,'ssh_Im',ztide_i(i0:i1,j0:j1,itide),start)
 !         call exchange_xxx(ztide_r(:,:,itide),ztide_i(:,:,itide))
@@ -283,14 +298,20 @@
           call ncread(ncid,'u_Im',utide_i(1:i1,j0:j1,itide),start)      ! these currents must be on u,v-points
 !         call exchange_xxx(utide_r(:,:,itide),utide_i(:,:,itide))      ! and rotated to align with the grid
 
-          call ncread(ncid,'v_Re',  vtide_r(i0:i1,1:j1,itide),start)    
+          call ncread(ncid,'v_Re',  vtide_r(i0:i1,1:j1,itide),start)
           call ncread(ncid,'v_Im',  vtide_i(i0:i1,1:j1,itide),start)
 !         call exchange_xxx(vtide_r(:,:,itide),vtide_i(:,:,itide))
+#endif
         endif
 
         if (pot_tides) then
+!#ifdef PIO
+!          call pio_ncread2(fname, 'pot_Re', ptide_r(i0:i1,j0:j1,itide), itide, '2D_rt')
+!          call pio_ncread2(fname, 'pot_Im', ptide_i(i0:i1,j0:j1,itide), itide, '2D_rt')
+!#else
           call ncread(ncid,'pot_Re',ptide_r(i0:i1,j0:j1,itide),start)
           call ncread(ncid,'pot_Im',ptide_i(i0:i1,j0:j1,itide),start)
+!#endif
 !         call exchange_xxx(ptide_r(:,:,itide),ptide_i(:,:,itide))
         endif
 
