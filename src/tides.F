@@ -153,6 +153,7 @@
      &        + vtide_r(i,j,itide)*cos(omT)- vtide_i(i,j,itide)*sin(omT)
             enddo
           endif
+
 #  endif
 
 #  ifdef OBC_SOUTH
@@ -179,6 +180,7 @@
             enddo
           endif
 #  endif
+
 #  ifdef OBC_NORTH
           if (NORTHERN_EDGE) THEN
 #   ifdef ANA_BRY
@@ -250,6 +252,7 @@
       ! since tides are only read once, don't need to store netcdf vars
       ! continue searching while tides not found & still more files to check
       ! search for forcing file with tidal information
+
       do while ((found_rec==0).and.(var_file_indx <= max_frc))
 
         ierr=nf90_open(frcfile(var_file_indx), nf90_nowrite, ncid)
@@ -317,6 +320,7 @@
 
       end do ! <-- itide=1,ntides
 
+          print *, mynode, "00001"
       if (bry_tides) then
         call exchange_xxx(ztide_r,ztide_i)
         call exchange_xxx(utide_r,utide_i)

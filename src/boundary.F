@@ -227,25 +227,25 @@
 #  endif
       if (obc_west.and.(.not.west_exchng)) then
 #  ifdef Z_FRC_BRY
-        call set_frc_data( nc_z_w, zeta_west(j0:j1), obry=2 )
+        call set_frc_data( nc_z_w, zeta_west(j0:j1), report=2, obry='ew1r' )
 !       call exch_bry_EW_tile(1, ny, zeta_west, 1)      ! DevinD - exchange did not make a difference
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_w, ubar_west(j0:j1), obry=1 )
-        call set_frc_data( nc_vb_w, vbar_west( 1:j1), obry=1 )
+        call set_frc_data( nc_ub_w, ubar_west(j0:j1), report=2, obry='ew1u')
+        call set_frc_data( nc_vb_w, vbar_west( 1:j1), report=2, obry='ew1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_w, var2d=u_west(j0:j1,:), obry=1 )
-        call set_frc_data( nc_v_w, var2d=v_west( 1:j1,:), obry=1 )
+        call set_frc_data( nc_u_w, var2d=u_west(j0:j1,:), report=2, obry='ew2u')
+        call set_frc_data( nc_v_w, var2d=v_west( 1:j1,:), report=2, obry='ew2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_w, var2d=w_west(j0:j1,:), obry=1 )
+!       call set_frc_data( nc_w_w, var2d=w_west(j0:j1,:), report=2, obry='ew2r' )
         w_west = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,nt
-          call set_frc_data( nc_t_w(itrc), var2d=t_west(j0:j1,:,itrc), obry=1 )
+          call set_frc_data( nc_t_w(itrc), var2d=t_west(j0:j1,:,itrc), report=2, obry='ew2r' )
         enddo
 #   endif
 #  endif
@@ -253,24 +253,24 @@
 
       if (obc_east.and.(.not.east_exchng)) then
 #  ifdef Z_FRC_BRY
-        call set_frc_data( nc_z_e, zeta_east(j0:j1), obry=2 )
+        call set_frc_data( nc_z_e, zeta_east(j0:j1), report=2, obry='ew1r')
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_e, ubar_east(j0:j1), obry=1 )
-        call set_frc_data( nc_vb_e, vbar_east( 1:j1), obry=1 )
+        call set_frc_data( nc_ub_e, ubar_east(j0:j1), report=2, obry='ew1u')
+        call set_frc_data( nc_vb_e, vbar_east( 1:j1), report=2, obry='ew1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_e, var2d=u_east(j0:j1,:), obry=1 )
-        call set_frc_data( nc_v_e, var2d=v_east( 1:j1,:), obry=1 )
+        call set_frc_data( nc_u_e, var2d=u_east(j0:j1,:), report=2, obry='ew2u')
+        call set_frc_data( nc_v_e, var2d=v_east( 1:j1,:), report=2, obry='ew2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_e, var2d=w_east(j0:j1,:), obry=1 )
+!       call set_frc_data( nc_w_e, var2d=w_east(j0:j1,:), report=2, obry='ew2r')
         w_east = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,NT
-          call set_frc_data( nc_t_e(itrc), var2d=t_east(j0:j1,:,itrc), obry=1 )
+          call set_frc_data( nc_t_e(itrc), var2d=t_east(j0:j1,:,itrc), report=2, obry='ew2r')
         enddo
 #   endif
 #  endif
@@ -278,24 +278,24 @@
 
       if (obc_south.and.(.not.south_exchng)) then
 #  ifdef Z_FRC_BRY
-        call set_frc_data( nc_z_s, zeta_south(i0:i1), obry=2 )
+        call set_frc_data( nc_z_s, zeta_south(i0:i1), report=2, obry='ns1r')
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_s, ubar_south( 1:i1), obry=1 )
-        call set_frc_data( nc_vb_s, vbar_south(i0:i1), obry=1 )
+        call set_frc_data( nc_ub_s, ubar_south( 1:i1), report=2, obry='ns1u')
+        call set_frc_data( nc_vb_s, vbar_south(i0:i1), report=2, obry='ns1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_s, var2d=u_south( 1:i1,:), obry=1 )
-        call set_frc_data( nc_v_s, var2d=v_south(i0:i1,:), obry=1 )
+        call set_frc_data( nc_u_s, var2d=u_south( 1:i1,:), report=2, obry='ns2u')
+        call set_frc_data( nc_v_s, var2d=v_south(i0:i1,:), report=2, obry='ns2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_s, var2d=w_south(i0:i1,:), obry=1 )
+!       call set_frc_data( nc_w_s, var2d=w_south(i0:i1,:), report=2, obry='ns2r')
         w_south = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,nt
-          call set_frc_data( nc_t_s(itrc), var2d=t_south(i0:i1,:,itrc), obry=1 )
+          call set_frc_data( nc_t_s(itrc), var2d=t_south(i0:i1,:,itrc), report=2, obry='ns2r')
         enddo
 #   endif
 #  endif
@@ -303,24 +303,24 @@
 
       if (obc_north.and.(.not.north_exchng)) then
 #  ifdef Z_FRC_BRY
-        call set_frc_data( nc_z_n, zeta_north(i0:i1), obry=2 )
+        call set_frc_data( nc_z_n, zeta_north(i0:i1), report=2, obry='ns1r')
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_n, ubar_north( 1:i1), obry=1 )
-        call set_frc_data( nc_vb_n, vbar_north(i0:i1), obry=1 )
+        call set_frc_data( nc_ub_n, ubar_north( 1:i1), report=2, obry='ns1u')
+        call set_frc_data( nc_vb_n, vbar_north(i0:i1), report=2, obry='ns1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_n, var2d=u_north( 1:i1,:), obry=1 )
-        call set_frc_data( nc_v_n, var2d=v_north(i0:i1,:), obry=1 )
+        call set_frc_data( nc_u_n, var2d=u_north( 1:i1,:), report=2, obry='ns2u')
+        call set_frc_data( nc_v_n, var2d=v_north(i0:i1,:), report=2, obry='ns2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_n, var2d=w_north(i0:i1,:), obry=1 )
+!       call set_frc_data( nc_w_n, var2d=w_north(i0:i1,:), report=2, obry='ns2r')
         w_north = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,NT
-          call set_frc_data( nc_t_n(itrc), var2d=t_north(i0:i1,:,itrc), obry=1 )
+          call set_frc_data( nc_t_n(itrc), var2d=t_north(i0:i1,:,itrc), report=2, obry='ns2r')
         enddo
 #   endif
 #  endif

@@ -80,6 +80,7 @@ c--#define VERBOSE
       ierr=nf90_open(ininame, nf90_nowrite, ncid)
       if (ierr == nf90_noerr) then
 #ifndef PIO ! skip checkdims if we are using only one input file
+!!! Might want to come back to this and make it PIO-compatible
         ierr=checkdims (ncid, ininame, max_rec)
 #endif
         if (ierr == nf90_noerr) then
@@ -322,7 +323,7 @@ c--#define VERBOSE
       start=1; start(3)=record                                       ! 2D vars
 
 #ifdef PIO
-      call pio_ncread2(ininame, 'zeta', zeta(i0:i1,j0:j1,1), '2D_r', 1)
+      call pio_ncread2(ininame, 'zeta', zeta(i0:i1,j0:j1,1), '2D_r', record)
 #else
       call ncread(ncid,'zeta',zeta(i0:i1,j0:j1,1),start)
 #endif
@@ -330,7 +331,7 @@ c--#define VERBOSE
       call exchange_xxx(zeta(:,:,1))
 
 #ifdef PIO
-      call pio_ncread2(ininame, 'ubar', ubar(1:i1,j0:j1,1), '2D_u', 1)
+      call pio_ncread2(ininame, 'ubar', ubar(1:i1,j0:j1,1), '2D_u', record)
 #else
       call ncread(ncid,'ubar',ubar( 1:i1,j0:j1,1),start)
 #endif
@@ -338,7 +339,7 @@ c--#define VERBOSE
       call exchange_xxx(ubar(:,:,1))
 
 #ifdef PIO
-      call pio_ncread2(ininame, 'vbar', vbar(i0:i1,1:j1,1), '2D_v', 1)
+      call pio_ncread2(ininame, 'vbar', vbar(i0:i1,1:j1,1), '2D_v', record)
 #else
       call ncread(ncid,'vbar',vbar(i0:i1, 1:j1,1),start)
 #endif
@@ -364,10 +365,10 @@ c--#define VERBOSE
             ierr=nf90_inq_varid(ncid, 'DV_avg_bak', varid)
             if (ierr == nf90_noerr) then
 #ifdef PIO
-              call pio_ncread2(ininame, 'DU_avg2', DU_avg2(1:i1,j0:j1), '2D_u', 1)
-              call pio_ncread2(ininame, 'DV_avg2', DV_avg2(i0:i1,1:j1), '2D_v', 1)
-              call pio_ncread2(ininame, 'DU_avg_bak', DU_avg_bak(1:i1,j0:j1), '2D_u', 1)
-              call pio_ncread2(ininame, 'DV_avg_bak', DV_avg_bak(i0:i1,1:j1), '2D_v', 1)
+              call pio_ncread2(ininame, 'DU_avg2', DU_avg2(1:i1,j0:j1), '2D_u', record)
+              call pio_ncread2(ininame, 'DV_avg2', DV_avg2(i0:i1,1:j1), '2D_v', record)
+              call pio_ncread2(ininame, 'DU_avg_bak', DU_avg_bak(1:i1,j0:j1), '2D_u', record)
+              call pio_ncread2(ininame, 'DV_avg_bak', DV_avg_bak(i0:i1,1:j1), '2D_v', record)
 #else
               call ncread(ncid,'DU_avg2',      DU_avg2( 1:i1,j0:j1),start)
               call ncread(ncid,'DV_avg2',      DV_avg2(i0:i1, 1:j1),start)
@@ -394,8 +395,8 @@ c--#define VERBOSE
         ierr=nf90_inq_varid(ncid,  'rvfrc_bak', varid)
         if (ierr == nf90_noerr) then
 #ifdef PIO
-          call pio_ncread2(ininame, 'rufrc_bak', rufrc_bak(1:i1,j0:j1,tindx), '2D_u', 1)
-          call pio_ncread2(ininame, 'rvfrc_bak', rvfrc_bak(i0:i1,1:j1,tindx), '2D_v', 1)
+          call pio_ncread2(ininame, 'rufrc_bak', rufrc_bak(1:i1,j0:j1,tindx), '2D_u', record)
+          call pio_ncread2(ininame, 'rvfrc_bak', rvfrc_bak(i0:i1,1:j1,tindx), '2D_v', record)
 #else
           call ncread(ncid,'rufrc_bak', rufrc_bak( 1:i1,j0:j1,tindx),start)    ! DevinD this update was untested
           call ncread(ncid,'rvfrc_bak', rvfrc_bak(i0:i1, 1:j1,tindx),start)
@@ -415,7 +416,7 @@ c--#define VERBOSE
 
       start=1; start(4)=record                                       ! 3D vars
 #ifdef PIO
-      call pio_ncread3(ininame, vname(1,indxU), u(1:i1,j0:j1,:,tindx), '3D_u', 1)
+      call pio_ncread3(ininame, vname(1,indxU), u(1:i1,j0:j1,:,tindx), '3D_u', record)
 #else
       call ncread(ncid,vname(1,indxU), u(1:i1,j0:j1,:,tindx),start)
 #endif
@@ -425,7 +426,7 @@ c--#define VERBOSE
       call exchange_xxx(u(:,:,:,tindx) )
 
 #ifdef PIO
-      call pio_ncread3(ininame, vname(1,indxV), v(i0:i1,1:j1,:,tindx), '3D_v', 1)
+      call pio_ncread3(ininame, vname(1,indxV), v(i0:i1,1:j1,:,tindx), '3D_v', record)
 #else
       call ncread(ncid,vname(1,indxV), v(i0:i1, 1:j1,:,tindx),start)           ! v requires masking and
 #endif
@@ -466,7 +467,7 @@ c--#define VERBOSE
         ierr=nf90_inq_varid(ncid, t_vname(itrc), varid)
         if (ierr == nf90_noerr) then
 #ifdef PIO
-          call pio_ncread3(ininame, t_vname(itrc), t(i0:i1,j0:j1,:,tindx,itrc), '3D_r', 1)
+          call pio_ncread3(ininame, t_vname(itrc), t(i0:i1,j0:j1,:,tindx,itrc), '3D_r', record)
 #else
           call ncread(ncid, t_vname(itrc), t(i0:i1,j0:j1,:,tindx,itrc), start)
 #endif
@@ -496,7 +497,7 @@ c--#define VERBOSE
       ierr=nf90_inq_varid(ncid, vname(1,indxHbls), varid)
       if (ierr == nf90_noerr) then
 #ifdef PIO
-      call pio_ncread2(ininame,vname(1,indxHbls), hbls(i0:i1,j0:j1), '2D_r', 1)
+      call pio_ncread2(ininame,vname(1,indxHbls), hbls(i0:i1,j0:j1), '2D_r', record)
 #else
       call ncread(ncid,vname(1,indxHbls),hbls(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
 #endif
@@ -513,7 +514,7 @@ c--#define VERBOSE
       ierr=nf90_inq_varid(ncid, vname(1,indxHbbl), varid)
       if (ierr == nf90_noerr) then
 #ifdef PIO
-      call pio_ncread2(ininame,vname(1,indxHbbl), hbbl(i0:i1,j0:j1), '2D_r', 1)
+      call pio_ncread2(ininame,vname(1,indxHbbl), hbbl(i0:i1,j0:j1), '2D_r', record)
 #else
       call ncread(ncid,vname(1,indxHbbl),hbbl(i0:i1,j0:j1),start)      ! mask doesn't change answer but makes
 #endif

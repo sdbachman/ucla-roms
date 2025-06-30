@@ -370,8 +370,10 @@ CR      write(*,*)  ' -2' MYID
 
       tdays = (time-0.0*dt)*sec2day
       call set_bry_all
+      print *, "made it here"
 
       if (bry_tides.or.pot_tides) call set_tides(0)
+      print *, "and now here"
 
       ! currrently, rho_eos works with t(nrhs), nrhs==nstp => time n
       call rho_eos(nrhs)

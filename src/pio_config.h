@@ -13,7 +13,7 @@
 #define PIO_VERSION_MINOR 6
 
 /** The patch part of the version number. */
-#define PIO_VERSION_PATCH 5
+#define PIO_VERSION_PATCH 6
 
 /** Set to non-zero to turn on logging. Output may be large. */
 #define PIO_ENABLE_LOGGING 0
@@ -26,16 +26,16 @@
 
 #define USE_VARD 0
 
-/* #undef PIO_HAS_PAR_FILTERS */
+#define PIO_HAS_PAR_FILTERS 
 /* Does netCDF support netCDF/HDF5 files? */
 #define HAVE_NETCDF4
 
 /* Does netCDF support parallel I/O for netCDF/HDF5 files? */
-/* #undef HAVE_NETCDF_PAR */
+#define HAVE_NETCDF_PAR
 
 /* Does PIO support netCDF/HDF5 files? (Will be same as
  * HAVE_NETCDF_PAR). */
-/* #undef _NETCDF4 */
+#define _NETCDF4
 
 /* Does netCDF and HDF5 support parallel I/O filters? */
 /* #undef HAVE_PAR_FILTERS */

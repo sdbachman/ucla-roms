@@ -183,6 +183,11 @@ C$    endif
 # endif
 
 #ifdef PIO
+        pio_xi_rho = xi_rho
+        pio_xi_u = xi_u
+        pio_eta_rho = eta_rho
+        pio_eta_v = eta_v
+
         if (inode == 0) then
           pio_xi_rho_start = iSW_corn+iwest
           pio_xi_u_start   = iSW_corn+iwest
