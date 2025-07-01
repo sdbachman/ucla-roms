@@ -660,7 +660,7 @@
 
       if (d1) then
 !#ifdef PIO
-!        call pio_ncread1(fname, vname, nc%vdata(:,1,it), obry, irec)
+        call pio_ncread1(fname, vname, nc%vdata(:,1,it), obry, irec)
 !#else
         call ncread(ncid,vname,nc%vdata(:,1,it),(/1,irec/))
 !#endif

@@ -280,7 +280,7 @@
         if(ierr/=0) call handle_ierr(ierr,'tides :: read omega')
 
         start(3) = itide
-
+          print *, "On node", mynode, "reached checkpoint 1"
         if (bry_tides) then
 #ifdef PIO
           fname = "INPUT/PARTED/roms_tides.nc"  ! frcfile(var_file_indx)
@@ -320,7 +320,7 @@
 
       end do ! <-- itide=1,ntides
 
-          print *, mynode, "00001"
+          print *, "On node", mynode, "reached checkpoint 2"
       if (bry_tides) then
         call exchange_xxx(ztide_r,ztide_i)
         call exchange_xxx(utide_r,utide_i)
