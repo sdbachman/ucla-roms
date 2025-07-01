@@ -1,0 +1,41 @@
+module --force purge
+module load ncarenv
+module load intel
+module load ncarcompilers/1.0.0
+module load cray-mpich
+module load netcdf-mpi
+
+# for building ParallelIO
+module load cmake
+
+#for analyzing stuff
+module load nco
+
+export CC=mpicc
+export FC=mpifort
+
+#export MPIHOME=/opt/cray/pe/mpich/8.1.25/ofi/intel/19.0/
+export MPIHOME=$NCAR_ROOT_MPI
+export NETCDFHOME=$NETCDF
+
+export PATH="./:$PATH"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$NETCDFHOME/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PNETCDFHOME/lib"
+
+# setup_roms_marbl will append absolute paths for ROMS_ROOT and MARBL_ROOT here:
+export ROMS_ROOT=/glade/derecho/scratch/bachman/pio_roms
+export MARBL_ROOT=/glade/derecho/scratch/bachman/roms_marbl_setup_assistant/MARBL
+export ROMSMARBL_ROOT=/glade/derecho/scratch/bachman/roms_marbl_setup_assistant
+export ROMSMARBL_SYSTEM=ncar_derecho_intel
+export PATH=$PATH:${ROMS_ROOT}/Tools-Roms:/glade/derecho/scratch/bachman/roms_marbl_setup_assistant
+
+export PIO_ROOT=/glade/derecho/scratch/bachman/ParallelIO_mpi/
+export PIO_INC="-I/$PIO_ROOT/build/src/flib/ -I/$PIO_ROOT/build/src/clib/ -I/$PIO_ROOT/build/src/gptl"
+export PIO_LIB="-L/$PIO_ROOT/build/src/flib/ -L/$PIO_ROOT/build/src/clib/ -L/$PIO_ROOT/build/src/gptl"
+
+export PATH=$PATH:/glade/derecho/scratch/bachman/ParallelIO_mpi/build/src/flib
+
+
+
+export MCC="make compile_clean"
+export MK="make COMPILER=ifort KEEP_PPSRC=true"
