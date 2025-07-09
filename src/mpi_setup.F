@@ -204,6 +204,11 @@ C$    endif
           pio_eta_v_start  = jSW_corn+jsouth
         endif
         pio_s_start = 1
+
+        pio_west_exchng = west_exchng
+        pio_east_exchng = east_exchng
+        pio_north_exchng = north_exchng
+        pio_south_exchng = south_exchng
 #endif
 
 

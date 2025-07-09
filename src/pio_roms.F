@@ -156,12 +156,19 @@
       integer, allocatable  :: pio_fcompdof_ew1u(:)
       integer, allocatable  :: pio_fcompdof_ew1v(:)
 
+      integer, allocatable  :: pio_fcompdof_zero(:)
+
       integer, public :: pio_xi_rho, pio_eta_rho
       integer, public :: pio_xi_u, pio_eta_v
 
       integer, public :: pio_xi_rho_start, pio_eta_rho_start
       integer, public :: pio_xi_u_start, pio_eta_v_start
       integer, public :: pio_s_start
+
+      logical, public :: pio_west_exchng
+      logical, public :: pio_east_exchng
+      logical, public :: pio_north_exchng
+      logical, public :: pio_south_exchng
 
       !! Initialize the ParallelIO library. Also allocate
       !! memory to read data from the netCDF file.
@@ -370,6 +377,8 @@
         allocate(pio_fcompdof_ew1u( pio_memsize_ew1u ))
         allocate(pio_fcompdof_ew1v( pio_memsize_ew1v ))
 
+        allocate(pio_fcompdof_zero( 0 ))
+
       end subroutine pio_initialize
 ! ----------------------------------------------------------------------
       subroutine pio_storage_to_memory(gtype, irec)
@@ -534,7 +543,7 @@
         endif
 
         ! Northern/Southern boundary r points (2D) (assumed to always have a time dimension)
-        if (gtype=='ns2r') then
+        if ((gtype=='n_2r') .or. (gtype=='s_2r')) then
           do k=1,N
             do i=1,pio_xi_rho
               wbuf = (pio_dimLen_ns2r(1)*pio_dimLen_ns2r(2))*(irec-1) +
@@ -546,7 +555,7 @@
         endif
 
         ! Northern/Southern boundary u points (2D) (assumed to always have a time dimension)
-        if (gtype=='ns2u') then
+        if ((gtype=='n_2u') .or. (gtype=='s_2u')) then
           do k=1,N
             do i=1,pio_xi_u
               wbuf = (pio_dimLen_ns2u(1)*pio_dimLen_ns2u(2))*(irec-1) +
@@ -558,7 +567,7 @@
         endif
 
         ! Northern/Southern boundary v points (2D) (assumed to always have a time dimension)
-        if (gtype=='ns2v') then
+        if ((gtype=='n_2v') .or. (gtype=='s_2v')) then
           do k=1,N
             do i=1,pio_xi_rho
               wbuf = (pio_dimLen_ns2v(1)*pio_dimLen_ns2v(2))*(irec-1) +
@@ -570,7 +579,7 @@
         endif
 
         ! Northern/Southern boundary r points (1D) (assumed to always have a time dimension)
-        if (gtype=='ns1r') then
+        if ((gtype=='n_1r') .or. (gtype=='s_1r')) then
           do i=1,pio_xi_rho
               wbuf = pio_dimLen_ns1r(1)*(irec-1) + (pio_xi_rho_start - 1 + i)
               tmp_idx = i
@@ -579,7 +588,7 @@
         endif
 
         ! Northern/Southern boundary u points (1D) (assumed to always have a time dimension)
-        if (gtype=='ns1u') then
+        if ((gtype=='n_1u') .or. (gtype=='s_1u')) then
           do i=1,pio_xi_u
               wbuf = pio_dimLen_ns1u(1)*(irec-1) + (pio_xi_u_start - 1 + i)
               tmp_idx = i
@@ -588,7 +597,7 @@
         endif
 
         ! Northern/Southern boundary v points (1D) (assumed to always have a time dimension)
-        if (gtype=='ns1v') then
+        if ((gtype=='n_1v') .or. (gtype=='s_1v')) then
           do i=1,pio_xi_rho
               wbuf = pio_dimLen_ns1v(1)*(irec-1) + (pio_xi_rho_start - 1 + i)
               tmp_idx = i
@@ -597,7 +606,7 @@
         endif
 
         ! Eastern/Western boundary r points (2D) (assumed to always have a time dimension)
-        if (gtype=='ew2r') then
+        if ((gtype=='e_2r') .or. (gtype=='w_2r')) then
           do k=1,N
             do i=1,pio_eta_rho
               wbuf = (pio_dimLen_ew2r(1)*pio_dimLen_ew2r(2))*(irec-1) +
@@ -609,7 +618,7 @@
         endif
 
         ! Eastern/Western boundary u points (2D) (assumed to always have a time dimension)
-        if (gtype=='ew2u') then
+        if ((gtype=='e_2u') .or. (gtype=='w_2u')) then
           do k=1,N
             do i=1,pio_eta_rho
               wbuf = (pio_dimLen_ew2u(1)*pio_dimLen_ew2u(2))*(irec-1) +
@@ -621,7 +630,7 @@
         endif
 
         ! Eastern/Western boundary v points (2D) (assumed to always have a time dimension)
-        if (gtype=='ew2v') then
+        if ((gtype=='e_2v') .or. (gtype=='w_2v')) then
           do k=1,N
             do i=1,pio_eta_v
               wbuf = (pio_dimLen_ew2v(1)*pio_dimLen_ew2v(2))*(irec-1) +
@@ -633,7 +642,7 @@
         endif
 
         ! Eastern/Western boundary r points (1D) (assumed to always have a time dimension)
-        if (gtype=='ew1r') then
+        if ((gtype=='e_1r') .or. (gtype=='w_1r')) then
           do i=1,pio_eta_rho
               wbuf = pio_dimLen_ew1r(1)*(irec-1) + (pio_eta_rho_start - 1 + i)
               tmp_idx = i
@@ -642,7 +651,7 @@
         endif
 
         ! Eastern/Western boundary u points (1D) (assumed to always have a time dimension)
-        if (gtype=='ew1u') then
+        if ((gtype=='e_1u') .or. (gtype=='w_1u')) then
           do i=1,pio_eta_rho
               wbuf = pio_dimLen_ew1u(1)*(irec-1) + (pio_eta_rho_start - 1 + i)
               tmp_idx = i
@@ -651,7 +660,7 @@
         endif
 
         ! Eastern/Western boundary v points (1D) (assumed to always have a time dimension)
-        if (gtype=='ew1v') then
+        if ((gtype=='e_1v') .or. (gtype=='w_1v')) then
           do i=1,pio_eta_v
               wbuf = pio_dimLen_ew1v(1)*(irec-1) + (pio_eta_v_start - 1 + i)
               tmp_idx = i
@@ -665,8 +674,8 @@
 
         implicit none
 
-        character(len=4),intent(in)   :: gtype ! ('2D_','3D_','ns','ew') + ('u','v','r','1')
-        integer,optional,intent(in)       :: irec
+        character(len=4),intent(in)   :: gtype
+        integer,optional,intent(in)   :: irec
 
         if (gtype=='2D_r') then
           if (.not.present(irec)) then
@@ -734,76 +743,268 @@
           endif
         endif
 
-        if (gtype=='ns2r') then
+        if (gtype=='n_2r') then
           pio_dimLen_ns2r(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2r, pio_fcompdof_ns2r,
-     &    pio_desc_ns2r)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2r, pio_fcompdof_ns2r,
+     &      pio_desc_ns2r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2r, pio_fcompdof_zero,
+     &      pio_desc_ns2r)
+          endif
         endif
 
-        if (gtype=='ns2u') then
+        if (gtype=='n_2u') then
           pio_dimLen_ns2u(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2u, pio_fcompdof_ns2u,
-     &    pio_desc_ns2u)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2u, pio_fcompdof_ns2u,
+     &      pio_desc_ns2u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2u, pio_fcompdof_zero,
+     &      pio_desc_ns2u)
+          endif
         endif
 
-        if (gtype=='ns2v') then
+        if (gtype=='n_2v') then
           pio_dimLen_ns2v(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2v, pio_fcompdof_ns2v,
-     &    pio_desc_ns2v)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2v, pio_fcompdof_ns2v,
+     &      pio_desc_ns2v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2v, pio_fcompdof_zero,
+     &      pio_desc_ns2v)
+          endif
         endif
 
-        if (gtype=='ns1r') then
+        if (gtype=='n_1r') then
           pio_dimLen_ns1r(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1r, pio_fcompdof_ns1r,
-     &    pio_desc_ns1r)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1r, pio_fcompdof_ns1r,
+     &      pio_desc_ns1r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1r, pio_fcompdof_zero,
+     &      pio_desc_ns1r)
+          endif
         endif
 
-        if (gtype=='ns1u') then
+        if (gtype=='n_1u') then
           pio_dimLen_ns1u(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1u, pio_fcompdof_ns1u,
-     &    pio_desc_ns1u)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1u, pio_fcompdof_ns1u,
+     &      pio_desc_ns1u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1u, pio_fcompdof_zero,
+     &      pio_desc_ns1u)
+          endif
         endif
 
-        if (gtype=='ns1v') then
+        if (gtype=='n_1v') then
           pio_dimLen_ns1v(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1v, pio_fcompdof_ns1v,
-     &    pio_desc_ns1v)
+          if (.not. pio_north_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1v, pio_fcompdof_ns1v,
+     &      pio_desc_ns1v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1v, pio_fcompdof_zero,
+     &      pio_desc_ns1v)
+          endif
         endif
 
-        if (gtype=='ew2r') then
+        if (gtype=='s_2r') then
+          pio_dimLen_ns2r(3) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2r, pio_fcompdof_ns2r,
+     &      pio_desc_ns2r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2r, pio_fcompdof_zero,
+     &      pio_desc_ns2r)
+          endif
+        endif
+
+        if (gtype=='s_2u') then
+          pio_dimLen_ns2u(3) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2u, pio_fcompdof_ns2u,
+     &      pio_desc_ns2u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2u, pio_fcompdof_zero,
+     &      pio_desc_ns2u)
+          endif
+        endif
+
+        if (gtype=='s_2v') then
+          pio_dimLen_ns2v(3) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2v, pio_fcompdof_ns2v,
+     &      pio_desc_ns2v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns2v, pio_fcompdof_zero,
+     &      pio_desc_ns2v)
+          endif
+        endif
+
+        if (gtype=='s_1r') then
+          pio_dimLen_ns1r(2) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1r, pio_fcompdof_ns1r,
+     &      pio_desc_ns1r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1r, pio_fcompdof_zero,
+     &      pio_desc_ns1r)
+          endif
+        endif
+
+        if (gtype=='s_1u') then
+          pio_dimLen_ns1u(2) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1u, pio_fcompdof_ns1u,
+     &      pio_desc_ns1u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1u, pio_fcompdof_zero,
+     &      pio_desc_ns1u)
+          endif
+        endif
+
+        if (gtype=='s_1v') then
+          pio_dimLen_ns1v(2) = irec
+          if (.not. pio_south_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1v, pio_fcompdof_ns1v,
+     &      pio_desc_ns1v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ns1v, pio_fcompdof_zero,
+     &      pio_desc_ns1v)
+          endif
+        endif
+
+        if (gtype=='e_2r') then
           pio_dimLen_ew2r(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2r, pio_fcompdof_ew2r,
-     &    pio_desc_ew2r)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2r, pio_fcompdof_ew2r,
+     &      pio_desc_ew2r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2r, pio_fcompdof_zero,
+     &      pio_desc_ew2r)
+          endif
         endif
 
-        if (gtype=='ew2u') then
+        if (gtype=='e_2u') then
           pio_dimLen_ew2u(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2u, pio_fcompdof_ew2u,
-     &    pio_desc_ew2u)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2u, pio_fcompdof_ew2u,
+     &      pio_desc_ew2u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2u, pio_fcompdof_zero,
+     &      pio_desc_ew2u)
+          endif
         endif
 
-        if (gtype=='ew2v') then
+        if (gtype=='e_2v') then
           pio_dimLen_ew2v(3) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2v, pio_fcompdof_ew2v,
-     &    pio_desc_ew2v)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2v, pio_fcompdof_ew2v,
+     &      pio_desc_ew2v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2v, pio_fcompdof_zero,
+     &      pio_desc_ew2v)
+          endif
         endif
 
-        if (gtype=='ew1r') then
+        if (gtype=='e_1r') then
           pio_dimLen_ew1r(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1r, pio_fcompdof_ew1r,
-     &    pio_desc_ew1r)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1r, pio_fcompdof_ew1r,
+     &      pio_desc_ew1r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1r, pio_fcompdof_zero,
+     &      pio_desc_ew1r)
+          endif
         endif
 
-        if (gtype=='ew1u') then
+        if (gtype=='e_1u') then
           pio_dimLen_ew1u(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1u, pio_fcompdof_ew1u,
-     &    pio_desc_ew1u)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1u, pio_fcompdof_ew1u,
+     &      pio_desc_ew1u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1u, pio_fcompdof_zero,
+     &      pio_desc_ew1u)
+          endif
         endif
 
-        if (gtype=='ew1v') then
+        if (gtype=='e_1v') then
           pio_dimLen_ew1v(2) = irec
-          call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1v, pio_fcompdof_ew1v,
-     &    pio_desc_ew1v)
+          if (.not. pio_east_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1v, pio_fcompdof_ew1v,
+     &      pio_desc_ew1v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1v, pio_fcompdof_zero,
+     &      pio_desc_ew1v)
+          endif
+        endif
+
+        if (gtype=='w_2r') then
+          pio_dimLen_ew2r(3) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2r, pio_fcompdof_ew2r,
+     &      pio_desc_ew2r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2r, pio_fcompdof_zero,
+     &      pio_desc_ew2r)
+          endif
+        endif
+
+        if (gtype=='w_2u') then
+          pio_dimLen_ew2u(3) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2u, pio_fcompdof_ew2u,
+     &      pio_desc_ew2u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2u, pio_fcompdof_zero,
+     &      pio_desc_ew2u)
+          endif
+        endif
+
+        if (gtype=='w_2v') then
+          pio_dimLen_ew2v(3) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2v, pio_fcompdof_ew2v,
+     &      pio_desc_ew2v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew2v, pio_fcompdof_zero,
+     &      pio_desc_ew2v)
+          endif
+        endif
+
+        if (gtype=='w_1r') then
+          pio_dimLen_ew1r(2) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1r, pio_fcompdof_ew1r,
+     &      pio_desc_ew1r)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1r, pio_fcompdof_zero,
+     &      pio_desc_ew1r)
+          endif
+        endif
+
+        if (gtype=='w_1u') then
+          pio_dimLen_ew1u(2) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1u, pio_fcompdof_ew1u,
+     &      pio_desc_ew1u)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1u, pio_fcompdof_zero,
+     &      pio_desc_ew1u)
+          endif
+        endif
+
+        if (gtype=='w_1v') then
+          pio_dimLen_ew1v(2) = irec
+          if (.not. pio_west_exchng) then
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1v, pio_fcompdof_ew1v,
+     &      pio_desc_ew1v)
+          else
+            call PIO_initdecomp(pio_IoSystem, PIO_double, pio_dimLen_ew1v, pio_fcompdof_zero,
+     &      pio_desc_ew1v)
+          endif
         endif
 
       end subroutine pio_createDecomp
@@ -815,7 +1016,7 @@
         character(len=*) :: fname
         character(len=*) :: varName
         real,dimension(:),intent(inout) :: arr ! array to be filled
-        character(len=4),intent(in)       :: gtype ! ('ns','ew') + ('1')
+        character(len=4),intent(in)       :: gtype
         integer,optional,intent(in)       :: irec
 
 
@@ -835,17 +1036,17 @@
 
         ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
 
-        if (gtype=='ns1r') then
+        if ((gtype=='n_1r') .or. (gtype=='s_1r')) then
           pio_desc = pio_desc_ns1r
-        elseif (gtype=='ns1u') then
+        elseif ((gtype=='n_1u') .or. (gtype=='s_1u')) then
           pio_desc = pio_desc_ns1u
-        elseif (gtype=='ns1v') then
+        elseif ((gtype=='n_1v') .or. (gtype=='s_1v')) then
           pio_desc = pio_desc_ns1v
-        elseif (gtype=='ew1r') then
+        elseif ((gtype=='e_1r') .or. (gtype=='w_1r')) then
           pio_desc = pio_desc_ew1r
-        elseif (gtype=='ew1u') then
+        elseif ((gtype=='e_1u') .or. (gtype=='w_1u')) then
           pio_desc = pio_desc_ew1u
-        elseif (gtype=='ew1v') then
+        elseif ((gtype=='e_1v') .or. (gtype=='w_1v')) then
           pio_desc = pio_desc_ew1v
         endif
 
@@ -902,17 +1103,17 @@
           else
             pio_desc = pio_desc_2D_vt
           endif
-        elseif (gtype=='ns2r') then
+        elseif ((gtype=='n_2r') .or. (gtype=='s_2r')) then
           pio_desc = pio_desc_ns2r
-        elseif (gtype=='ns2u') then
+        elseif ((gtype=='n_2u') .or. (gtype=='s_2u')) then
           pio_desc = pio_desc_ns2u
-        elseif (gtype=='ns2v') then
+        elseif ((gtype=='n_2v') .or. (gtype=='s_2v')) then
           pio_desc = pio_desc_ns2v
-        elseif (gtype=='ew2r') then
+        elseif ((gtype=='e_2r') .or. (gtype=='w_2r')) then
           pio_desc = pio_desc_ew2r
-        elseif (gtype=='ew2u') then
+        elseif ((gtype=='e_2u') .or. (gtype=='w_2u')) then
           pio_desc = pio_desc_ew2u
-        elseif (gtype=='ew2v') then
+        elseif ((gtype=='e_2v') .or. (gtype=='w_2v')) then
           pio_desc = pio_desc_ew2v
         endif
 

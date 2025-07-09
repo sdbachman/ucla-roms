@@ -314,6 +314,9 @@
         error stop 'ERROR: set_frc_data :: time interpolation error'
       endif
 
+!      print *, obry, mynode, var1d
+
+
       end subroutine set_frc_data_1d  !]
 ! ----------------------------------------------------------------------
       subroutine set_frc_data_2d(nc,var2d,report,obry)  ![
@@ -646,6 +649,8 @@
       vname = nc%vname
       tname = nc%tname
 
+      fname = "INPUT/PARTED/roms_bry.nc"
+
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it) )
 
@@ -656,20 +661,18 @@
       ! file. Ensure this in the allocation of vdata
       ! This is in contrast with the _surf version of fill_frc_slice
 
-      fname = "INPUT/PARTED/roms_bry.nc"
-
       if (d1) then
-!#ifdef PIO
+#ifdef PIO
         call pio_ncread1(fname, vname, nc%vdata(:,1,it), obry, irec)
-!#else
+#else
         call ncread(ncid,vname,nc%vdata(:,1,it),(/1,irec/))
-!#endif
+#endif
       else
-!#ifdef PIO
+#ifdef PIO
         call pio_ncread2(fname, vname, nc%vdata(:,:,it), obry, irec)
-!#else
+#else
         call ncread(ncid,vname,nc%vdata(:,:,it),(/1,1,irec/))
-!#endif
+#endif
       endif
 !#ifndef PIO
       ierr = nf90_close(ncid)

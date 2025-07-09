@@ -82,6 +82,8 @@ c--#define VERBOSE
 #ifndef PIO ! skip checkdims if we are using only one input file
 !!! Might want to come back to this and make it PIO-compatible
         ierr=checkdims (ncid, ininame, max_rec)
+#else
+        max_rec=0
 #endif
         if (ierr == nf90_noerr) then
           if (max_rec > 0) then

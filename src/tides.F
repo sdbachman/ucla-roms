@@ -280,7 +280,8 @@
         if(ierr/=0) call handle_ierr(ierr,'tides :: read omega')
 
         start(3) = itide
-          print *, "On node", mynode, "reached checkpoint 1"
+          print *, "On node", mynode, "reached checkpoint 1 for tide #", itide
+          call flush
         if (bry_tides) then
 #ifdef PIO
           fname = "INPUT/PARTED/roms_tides.nc"  ! frcfile(var_file_indx)
@@ -317,6 +318,11 @@
 #endif
 !         call exchange_xxx(ptide_r(:,:,itide),ptide_i(:,:,itide))
         endif
+        print *, "Node ", mynode, "is JUST BEFORE barrier for tide #", itide
+        call flush
+        call MPI_Barrier(ocean_grid_comm, ierr)
+        print *, "Node ", mynode, "is THROUGH barrier for tide #", itide
+        call flush
 
       end do ! <-- itide=1,ntides
 
