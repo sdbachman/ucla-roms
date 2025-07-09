@@ -642,41 +642,38 @@
       character(len=20)  :: vname  ! name of variable in input file
       character(len=20)  :: tname  ! time variable name for variable
       integer            :: irec,ifile
-      character(len=256) fname
 
       irec  = nc%irec
       ifile = nc%ifile
       vname = nc%vname
       tname = nc%tname
 
-      fname = "INPUT/PARTED/roms_bry.nc"
-
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it) )
 
-!#ifndef PIO
+#ifndef PIO
       ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
-!#endif
+#endif
       ! The size of vdata must match the size of the data in the
       ! file. Ensure this in the allocation of vdata
       ! This is in contrast with the _surf version of fill_frc_slice
 
       if (d1) then
 #ifdef PIO
-        call pio_ncread1(fname, vname, nc%vdata(:,1,it), obry, irec)
+        call pio_ncread1(frcfile(ifile), vname, nc%vdata(:,1,it), obry, irec)
 #else
         call ncread(ncid,vname,nc%vdata(:,1,it),(/1,irec/))
 #endif
       else
 #ifdef PIO
-        call pio_ncread2(fname, vname, nc%vdata(:,:,it), obry, irec)
+        call pio_ncread2(frcfile(ifile), vname, nc%vdata(:,:,it), obry, irec)
 #else
         call ncread(ncid,vname,nc%vdata(:,:,it),(/1,1,irec/))
 #endif
       endif
-!#ifndef PIO
+#ifndef PIO
       ierr = nf90_close(ncid)
-!#endif
+#endif
 
       if (report==0) then
         if (mynode==0)
@@ -713,10 +710,6 @@
       character(len=20)  :: tname  ! time variable name for variable
       integer            :: irec,ifile
 
-      character(len=256) fname
-
-      fname = 'INPUT/PARTED/roms_frc.nc'
-
       irec  = nc%irec
       ifile = nc%ifile
       vname = nc%vname
@@ -725,7 +718,9 @@
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it) )
 
+#ifndef PIO
       ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
+#endif
       if (nc%coarse>0) then
         if (.not.allocated(cdata)) then
           call init_coarse
@@ -755,26 +750,27 @@
       else
         if (gtype=='u') then
 #ifdef PIO
-          call pio_ncread2(fname, vname, nc%vdata(1:i1,j0:j1,it), '2D_u', irec)
+          call pio_ncread2(frcfile(ifile), vname, nc%vdata(1:i1,j0:j1,it), '2D_u', irec)
 #else
           call ncread(ncid,vname,nc%vdata(1:i1,j0:j1,it),(/1,1,irec/))
 #endif
         elseif (gtype=='v') then
 #ifdef PIO
-          call pio_ncread2(fname, vname, nc%vdata(i0:i1,1:j1,it), '2D_v', irec)
+          call pio_ncread2(frcfile(ifile), vname, nc%vdata(i0:i1,1:j1,it), '2D_v', irec)
 #else
           call ncread(ncid,vname,nc%vdata(i0:i1,1:j1,it),(/1,1,irec/))
 #endif
         else    ! rho-grid
 #ifdef PIO
-          call pio_ncread2(fname, vname, nc%vdata(i0:i1,j0:j1,it), '2D_r', irec)
+          call pio_ncread2(frcfile(ifile), vname, nc%vdata(i0:i1,j0:j1,it), '2D_r', irec)
 #else
           call ncread(ncid,vname,nc%vdata(i0:i1,j0:j1,it),(/1,1,irec/))
 #endif
         endif
       endif
+#ifndef PIO
       ierr = nf90_close(ncid)
-
+#endif
       call exchange_xxx(nc%vdata(:,:,it))
 
       if (mynode==0) then

@@ -1,0 +1,8 @@
+
+      ! ****************************************************************
+      ! user inputs
+
+      integer, parameter        :: pio_stride=1         ! Stride in the mpi rank between io tasks.
+
+      ! end user inputs
+      ! ****************************************************************

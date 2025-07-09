@@ -231,165 +231,137 @@
       return
 #  endif
 
+      if (obc_west) then
 #ifndef PIO
-      if (obc_west.and.(.not.west_exchng)) then
+        if (.not.west_exchng) then
 #endif
 #  ifdef Z_FRC_BRY
-        call set_frc_data( nc_z_w, zeta_west(j0:j1), report=2, obry='w_1r' )
+        call set_frc_data( nc_z_w, zeta_west(j0:j1), report=0, obry='w_1r' )
 !       call exch_bry_EW_tile(1, ny, zeta_west, 1)      ! DevinD - exchange did not make a difference
 #  endif
 
-       print *, "Node ", mynode, "made it past zeta_west"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
-
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_w, ubar_west(j0:j1), report=2, obry='w_1u')
-        call set_frc_data( nc_vb_w, vbar_west( 1:j1), report=2, obry='w_1v')
+        call set_frc_data( nc_ub_w, ubar_west(j0:j1), report=1, obry='w_1u')
+        call set_frc_data( nc_vb_w, vbar_west( 1:j1), report=1, obry='w_1v')
 #  endif
-
-       print *, "Node ", mynode, "made it past ubar and vbar_west"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
 
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_w, var2d=u_west(j0:j1,:), report=2, obry='w_2u')
-       print *, "Node ", mynode, "made it past u_west"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
-        call set_frc_data( nc_v_w, var2d=v_west( 1:j1,:), report=2, obry='w_2v')
-       print *, "Node ", mynode, "made it past v_west"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
+        call set_frc_data( nc_u_w, var2d=u_west(j0:j1,:), report=1, obry='w_2u')
+        call set_frc_data( nc_v_w, var2d=v_west( 1:j1,:), report=1, obry='w_2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_w, var2d=w_west(j0:j1,:), report=2, obry='w_2r' )
+!       call set_frc_data( nc_w_w, var2d=w_west(j0:j1,:), report=1, obry='w_2r' )
         w_west = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,nt
-          call set_frc_data( nc_t_w(itrc), var2d=t_west(j0:j1,:,itrc), report=2, obry='w_2r' )
+          call set_frc_data( nc_t_w(itrc), var2d=t_west(j0:j1,:,itrc), report=1, obry='w_2r' )
         enddo
 #   endif
-       print *, "Node ", mynode, "made it past t_west"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
 #  endif
 #ifndef PIO
       endif
 #endif
+      endif ! obc_west
 
-!       print *, "Node ", mynode, "is JUST BEFORE barrier"
-!       call flush
-!       call MPI_Barrier(ocean_grid_comm, ierr)
-!      print *,  "Node ", mynode, "is JUST AFTER barrier"
 
-      if (obc_east.and.(.not.east_exchng)) then
+      if (obc_east) then
+#ifndef PIO
+        if (.not.east_exchng) then
+#endif
 #  ifdef Z_FRC_BRY
         call set_frc_data( nc_z_e, zeta_east(j0:j1), report=2, obry='e_1r')
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_e, ubar_east(j0:j1), report=2, obry='e_1u')
-        call set_frc_data( nc_vb_e, vbar_east( 1:j1), report=2, obry='e_1v')
+        call set_frc_data( nc_ub_e, ubar_east(j0:j1), report=1, obry='e_1u')
+        call set_frc_data( nc_vb_e, vbar_east( 1:j1), report=1, obry='e_1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_e, var2d=u_east(j0:j1,:), report=2, obry='e_2u')
-        call set_frc_data( nc_v_e, var2d=v_east( 1:j1,:), report=2, obry='e_2v')
+        call set_frc_data( nc_u_e, var2d=u_east(j0:j1,:), report=1, obry='e_2u')
+        call set_frc_data( nc_v_e, var2d=v_east( 1:j1,:), report=1, obry='e_2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_e, var2d=w_east(j0:j1,:), report=2, obry='e_2r')
+!       call set_frc_data( nc_w_e, var2d=w_east(j0:j1,:), report=1, obry='e_2r')
         w_east = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,NT
-          call set_frc_data( nc_t_e(itrc), var2d=t_east(j0:j1,:,itrc), report=2, obry='e_2r')
+          call set_frc_data( nc_t_e(itrc), var2d=t_east(j0:j1,:,itrc), report=1, obry='e_2r')
         enddo
 #   endif
 #  endif
-      endif
-
-!      print *, "SOUTH", mynode, obc_south, south_exchng
 #ifndef PIO
-      if (obc_south.and.(.not.south_exchng)) then
+      endif
+#endif
+      endif ! obc_east
+
+      if (obc_south) then
+#ifndef PIO
+      if (.not.south_exchng) then
 #endif
 #  ifdef Z_FRC_BRY
         call set_frc_data( nc_z_s, zeta_south(i0:i1), report=2, obry='s_1r')
 #  endif
 
-       print *, "Node ", mynode, "made it past zeta_south"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
-
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_s, ubar_south( 1:i1), report=2, obry='s_1u')
-        call set_frc_data( nc_vb_s, vbar_south(i0:i1), report=2, obry='s_1v')
+        call set_frc_data( nc_ub_s, ubar_south( 1:i1), report=1, obry='s_1u')
+        call set_frc_data( nc_vb_s, vbar_south(i0:i1), report=1, obry='s_1v')
 #  endif
-
-       print *, "Node ", mynode, "made it past ubar and vbar south"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
 
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_s, var2d=u_south( 1:i1,:), report=2, obry='s_2u')
-        call set_frc_data( nc_v_s, var2d=v_south(i0:i1,:), report=2, obry='s_2v')
+        call set_frc_data( nc_u_s, var2d=u_south( 1:i1,:), report=1, obry='s_2u')
+        call set_frc_data( nc_v_s, var2d=v_south(i0:i1,:), report=1, obry='s_2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_s, var2d=w_south(i0:i1,:), report=2, obry='s_2r')
+!       call set_frc_data( nc_w_s, var2d=w_south(i0:i1,:), report=1, obry='s_2r')
         w_south = 0
 #     endif
 #   endif
 
-       print *, "Node ", mynode, "made it past u_south and v_south"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
-
 #   ifdef T_FRC_BRY
         do itrc=1,nt
-          call set_frc_data( nc_t_s(itrc), var2d=t_south(i0:i1,:,itrc), report=2, obry='s_2r')
+          call set_frc_data( nc_t_s(itrc), var2d=t_south(i0:i1,:,itrc), report=1, obry='s_2r')
         enddo
 #   endif
-
-       print *, "Node ", mynode, "made it past t_south"
-       call flush
-       call MPI_Barrier(ocean_grid_comm, ierr)
-
 #  endif
 #ifndef PIO
       endif
 #endif
+      endif ! obc_south
 
-!      print *, "NORTH", mynode, obc_north, north_exchng
-
+      if (obc_north) then
 #ifndef PIO
-      if (obc_north.and.(.not.north_exchng)) then
+      if (.not.north_exchng) then
 #endif
 #  ifdef Z_FRC_BRY
         call set_frc_data( nc_z_n, zeta_north(i0:i1), report=2, obry='n_1r')
 #  endif
 #  ifdef M2_FRC_BRY
-        call set_frc_data( nc_ub_n, ubar_north( 1:i1), report=2, obry='n_1u')
-        call set_frc_data( nc_vb_n, vbar_north(i0:i1), report=2, obry='n_1v')
+        call set_frc_data( nc_ub_n, ubar_north( 1:i1), report=1, obry='n_1u')
+        call set_frc_data( nc_vb_n, vbar_north(i0:i1), report=1, obry='n_1v')
 #  endif
 #  ifdef SOLVE3D
 #   ifdef M3_FRC_BRY
-        call set_frc_data( nc_u_n, var2d=u_north( 1:i1,:), report=2, obry='n_2u')
-        call set_frc_data( nc_v_n, var2d=v_north(i0:i1,:), report=2, obry='n_2v')
+        call set_frc_data( nc_u_n, var2d=u_north( 1:i1,:), report=1, obry='n_2u')
+        call set_frc_data( nc_v_n, var2d=v_north(i0:i1,:), report=1, obry='n_2v')
 #     ifdef NHMG
-!       call set_frc_data( nc_w_n, var2d=w_north(i0:i1,:), report=2, obry='n_2r')
+!       call set_frc_data( nc_w_n, var2d=w_north(i0:i1,:), report=1, obry='n_2r')
         w_north = 0
 #     endif
 #   endif
 #   ifdef T_FRC_BRY
         do itrc=1,NT
-          call set_frc_data( nc_t_n(itrc), var2d=t_north(i0:i1,:,itrc), report=2, obry='n_2r')
+          call set_frc_data( nc_t_n(itrc), var2d=t_north(i0:i1,:,itrc), report=1, obry='n_2r')
         enddo
 #   endif
 #  endif
 #ifndef PIO
       endif
 #endif
+      endif ! obc_north
+
       end subroutine set_bry_all  !]
 
 !----------------------------------------------------------------------
