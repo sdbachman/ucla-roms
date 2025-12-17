@@ -364,11 +364,13 @@
          endif
         endif ! cdr_hsc(icdr) = 0
 
-        ! Check for releases on land
-        if ((frac(lmi(1),lmi(2),icdr) ==1 ) .and.
-     &  (rmask(lmi(1),lmi(2))==0)) then
-           bad_releases(icdr) = .true.
-        end if
+        if (.not. relocate_to_wet_pts) then
+          ! Check for releases centered on land
+          if ((frac(lmi(1),lmi(2),icdr) ==1 ) .and.
+     &    (rmask(lmi(1),lmi(2))==0)) then
+            bad_releases(icdr) = .true.
+          end if
+        endif
 
         cidx_start = cidx
       enddo                    ! icdr
@@ -987,6 +989,17 @@
           dist(i,j) = radius*dist(i,j);    !Haversine distance
         enddo
       enddo
+
+      if (relocate_to_wet_pts) then
+        do j=1,ny
+          do i=1,nx
+            if (rmask(i,j) == 0) then
+              dist(i,j) = 1.E8
+            endif
+          enddo
+        enddo
+      endif
+
       deallocate(dLon2)
       deallocate(dLat2)
 
