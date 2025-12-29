@@ -1,5 +1,6 @@
       module frc_output
 
+! Module for forcing output
 ! Write out fields related to how the model is being dynamically
 ! or thermodynamically forced.
 
