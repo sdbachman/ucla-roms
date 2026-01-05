@@ -39,6 +39,7 @@
       allocate(  tair(GLOBAL_2D_ARRAY) )
       allocate(     Q(GLOBAL_2D_ARRAY) )
       allocate( prate(GLOBAL_2D_ARRAY) )
+      allocate( evap(GLOBAL_2D_ARRAY) )      
       allocate( lwrad(GLOBAL_2D_ARRAY) )
 
       allocate( wspd_used(GLOBAL_2D_ARRAY) )
