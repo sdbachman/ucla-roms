@@ -743,6 +743,9 @@
 # ifdef MASKING
           stflx(i,j,itrc)=stflx(i,j,itrc)*rmask(i,j)
 # endif
+        ! This option makes it so that ALK and DIC use the tracer values
+        ! for their ALT counterparts when calculating their virtual
+        ! fluxes
         elseif (t_ana_frc(itrc)==3) then
           stflx(i,j,itrc)=(evap(i,j)-(prate(i,j)/(100.*3600.*24.))) *
      &                            t(i,j,N,nrhs,itrc+1)
