@@ -102,6 +102,10 @@
 
            ! do nothing, this is done in bulk_frc
 
+        elseif(t_ana_frc(itrc)==3) then   ! bulk forcing
+
+           ! do nothing, this is done in bulk_frc
+
         else
 
           if(mynode==0) then
