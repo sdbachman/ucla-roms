@@ -1,0 +1,10 @@
+      ! The adaptive timestep module determines and sets the maximum allowable timestep
+      ! based on the dynamical and thermodynamical state of the model. 
+      !
+      !------------------------------
+      logical,parameter,public :: do_adaptive = .false.
+
+      ! Settings for determining dt
+      integer, parameter    :: dt_update_frequency = 5  ! Number of timesteps between recalculating dt
+      real, parameter       :: max_adv_CFL = 1          ! Maximum CFL number to use for the advective fluxes
+                                                        ! Recommended to keep at 1 for stability 

@@ -114,6 +114,8 @@ C$OMP END PARALLEL                       ! launch the model in OpenMP
       use sponge_tune, only: init_orlanski_tune
 #endif
       use error_handling_mod, only: error_log
+      use adaptive_timestep, only: set_adaptive_dt
+
       implicit none
 
       integer trd, tile, my_first, my_last, range
@@ -299,6 +301,7 @@ CR      write(*,*)  ' -2' MYID
         mpi_master_only write(*,'(/1x,A/)')
      &     'main :: initialization complete, started time-stepping.'
 
+      call set_adaptive_dt
       call diag  ! log file output of global norms
 
       end subroutine roms_init
@@ -331,6 +334,7 @@ CR      write(*,*)  ' -2' MYID
      &     wrt_his_ocean_vars, wrt_rst_ocean_vars
       use boundary, only: set_bry_all
       use tides, only: set_tides
+      use adaptive_timestep, only: set_adaptive_dt
 # if defined(BIOLOGY_BEC2) || defined(MARBL)
       use bgc_io, only: wrt_bgc
 #endif
@@ -357,6 +361,8 @@ CR      write(*,*)  ' -2' MYID
 
       nstp=1+mod(iic-ntstart,2)
       nrhs=nstp ; nnew=3
+
+      call set_adaptive_dt
 
       ! Interpolate forcing data to model time n+1/2
       ! get_frc (both versions work with tdays, adding 0.5*dt)

@@ -142,6 +142,9 @@ endif
 	NETCDFC_INC=$(or $(shell nc-config --cflags), -I$(NETCDFHOME)include)
 	NETCDFC_LIB=$(or $(shell nc-config --libs),   -L$(NETCDFHOME)lib -lnetcdf)
 
+        LAPACK_INC=-I$(NETLIB_LAPACK_HOME)/include
+        LAPACK_LIB=-L$(NETLIB_LAPACK_HOME)/lib64 -llapack
+
 # MARBL
 ifeq ($(USEMARBL),true)
     ifeq ($(COMPILER),gnu)
@@ -210,6 +213,7 @@ endif
 
 # Options to link to libraries & modules (NetCDF, etc):
         LCDF =  $(NETCDFF_LIB) $(NETCDFC_LIB)
+	LCDF += $(LAPACK_LIB) $(LAPACK_INC)
 ifeq ($(USEMARBL),true)
 	LCDF += $(MARBL_LIB)
 endif
