@@ -8,7 +8,7 @@
 
       use dimensions, only: nx,ny,nz
       use scalars, only: dt, iic, g, rho0, pi
-      use param, only: N,LLm, MMm, mynode, ocean_grid_comm
+      use param, only: N,Lm,Mm,LLm, MMm, mynode, ocean_grid_comm
       use grid, only: pn, pm, rmask, f
       use ocean_vars, only: Hz, We, Wi, FlxU, FlxV, z_r
       use mpi_f08, only: mpi_double_precision, mpi_max
@@ -44,7 +44,8 @@
       logical,save :: done=.false.
 
       if (.not. done) then
-        allocate( fastest_bc_wavespeed(GLOBAL_2D_ARRAY) ); fastest_bc_wavespeed = 0
+        allocate( fastest_bc_wavespeed(GLOBAL_2D_ARRAY) );
+        fastest_bc_wavespeed(:,:) = 0
         smallest_k2 = (2*pi/(grdmax*LLm))**2+(2*pi/(grdmax*MMm))**2
         done=.true.
       endif
@@ -211,7 +212,7 @@
 
           do k=1,nz
             dpth = -z_r(i,j,k)
-            rho(k)=rho1(i,j,k)+qp1(i,j,k)*dpth*(1.-qp2*dpth)
+            rho(k)=rho1(i,j,k)+qp1(i,j,k)*dpth !*(1.-qp2*dpth)
           enddo
 
           do k=2,nz
@@ -251,9 +252,9 @@
           fastest_bc_wavespeed(i,j) = sqrt(f(i,j)**2 / smallest_k2 + largest_eigenvalue)
 
 
-!          if ((i==5) .and. (j==5)) then
-!              write(*,*) "YAY", D
-!          endif
+          if ((i==5) .and. (j==5)) then
+              write(*,*) "YAY", g_prime
+          endif
 
         enddo
       enddo
