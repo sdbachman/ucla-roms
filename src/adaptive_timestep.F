@@ -7,20 +7,23 @@
 
 
       use dimensions, only: nx,ny,nz
-      use scalars, only: dt, iic, g, rho0
-      use param, only: N, mynode, ocean_grid_comm
-      use grid, only: pn, pm, rmask
+      use scalars, only: dt, iic, g, rho0, pi
+      use param, only: N,LLm, MMm, mynode, ocean_grid_comm
+      use grid, only: pn, pm, rmask, f
       use ocean_vars, only: Hz, We, Wi, FlxU, FlxV, z_r
       use mpi_f08, only: mpi_double_precision, mpi_max
       use eos_vars, only: rho1,qp1,qp2
+      use comm_vars, only: grdmax
 
       implicit none
 
       private
 
 #include "adaptive_timestep.opt"
-      real :: Cu_Adv=0    ! Advective CFL number
 
+      real :: Cu_Adv=0    ! Advective CFL number
+      real,allocatable,dimension(:,:) :: fastest_bc_wavespeed
+      real :: smallest_k2
       public set_adaptive_dt
 
       contains
@@ -38,6 +41,13 @@
 
       ! local
       real :: dt_adv 
+      logical,save :: done=.false.
+
+      if (.not. done) then
+        allocate( fastest_bc_wavespeed(GLOBAL_2D_ARRAY) ); fastest_bc_wavespeed = 0
+        smallest_k2 = (2*pi/(grdmax*LLm))**2+(2*pi/(grdmax*MMm))**2
+        done=.true.
+      endif
 
       ! ------ Maximum timestep based on advective CFL ------
 
@@ -189,11 +199,12 @@
       ! local
       integer :: i,j,k
       integer :: info, ierr
-      real :: dpth
+      real :: dpth, largest_eigenvalue
       real, dimension(N) :: D=0
       real, dimension(N) :: rho
       real, dimension(N-1) :: E=0
       real, dimension(2:N) :: g_prime
+      
 
       do j=1,ny
         do i=1,nx
@@ -207,36 +218,42 @@
             g_prime(k)= g * (rho(k-1)-rho(k)) / rho0
           enddo
 
+          ! Solve for the eigenvalues of a real, symmetric matrix that 
+          ! is similar to M^-1.
           ! Note that ROMS' layer indexing is backwards from the normal
           ! convention, meaning that the vertical index increases
           ! UPWARDS. Here we will follow the convention in RR24 A.8, which
           ! is to have the shallowest layers at the top of the matrix M
 
-!          D(1) = ((g_prime(nz)+g) /        
-!     &        (g_prime(nz)*g)) / Hz(i,j,nz)
-!          E(1) = -1 / (g_prime(nz)*Hz(i,j,nz-1))
-!          do k=2,nz-1          
-!            D(k) = ((g_prime(nz-k+1)+g_prime(nz-k+2)) / 
-!     &        (g_prime(nz-k+1)*g_prime(nz-k+2))) / Hz(i,j,nz-k+1)
-!            E(k) = -1 / (g_prime(nz-k+1)*Hz(i,j,nz-k))
-!          enddo
-!          D(N) = 1/(g_prime(2)*Hz(i,j,2))
-
-          D(1) = 1/(g*Hz(i,j,nz)) + 1/(g_prime(nz)*Hz(i,j,nz))
-          E(1) = -1 / (g_prime(nz)*Hz(i,j,nz-1))
+          ! The eigenvalues will have units of s2/m2. The output of
+          ! dsterf will put the smallest eigenvalue of M-1 FIRST, which
+          ! corresponds to the largest eigenvalue of M
+          E(1) = -1 / (g_prime(nz)*sqrt(Hz(i,j,nz)*Hz(i,j,nz-1)))
+          D(1) = E(1) + 1/(g*Hz(i,j,nz))        
           do k=2,nz-1
-            D(k) = (1/g_prime(nz-k+1)+1/g_prime(nz-k+2)) / Hz(i,j,nz-k+1)
-            E(k) = -1 / (g_prime(nz-k+1)*Hz(i,j,nz-k))
+            E(k) = -1 / (g_prime(nz-k+1)*sqrt(Hz(i,j,nz-k+1)*Hz(i,j,nz-k))) 
+            D(k) = -(E(k) + E(k-1))
           enddo
-          D(N) = 1/(g_prime(2)*Hz(i,j,2))         
+          D(nz) = -E(nz-1)
 
           call dsterf(nz,D,E,info)
 
-          if ((i==5) .and. (j==5)) then
-            do k=2,nz-1
-              write(*,*) D(k), (E(k-1)+E(k))
-            enddo
-          endif
+          largest_eigenvalue = 1 / D(1)
+
+          ! The disperion relation is
+          ! \omega = \pm \sqrt(f^2 + \lambda K^2),
+          ! where K^2 = k^2 + l^2
+          ! so the baroclinic wave speed will be
+          ! \omega/K = \pm \sqrt(f^2/K^2 + \lambda)
+          ! The fastest wave speed will be associated with the smallest
+          ! possible value of K^2 = (2*pi/Lx)**2 + (2*pi/Ly)**2
+
+          fastest_bc_wavespeed(i,j) = sqrt(f(i,j)**2 / smallest_k2 + largest_eigenvalue)
+
+
+!          if ((i==5) .and. (j==5)) then
+!              write(*,*) "YAY", D
+!          endif
 
         enddo
       enddo
