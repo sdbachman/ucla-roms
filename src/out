@@ -1,0 +1,631 @@
+diff --git a/src/bulk_frc.F b/src/bulk_frc.F
+index 693ffb6..0bdbfb7 100644
+--- a/src/bulk_frc.F
++++ b/src/bulk_frc.F
+@@ -13,7 +13,7 @@
+ 
+ #include "bulk_frc.opt"
+ 
+-      real,allocatable,public,dimension(:,:) ::  tair             ! air temp, used in step3d_t to add the heat of rain water
++      real,allocatable,public,dimension(:,:) ::  tair             ! air temp
+       real,allocatable,public,dimension(:,:) ::     Q             ! SPECIFIC humidity (kg/kg) (not relative), qair in old code
+       real,allocatable,public,dimension(:,:) :: prate             ! prate (precipitation rate) - 'rain' variable in old code
+       real,allocatable,public,dimension(:,:) :: evap              ! evap (evaporation rate)
+@@ -35,13 +35,13 @@
+ ! ----------------------------------------------------------------------
+       subroutine init_arrays_bulk_frc  ![
+       implicit none
+-      allocate(  tair(GLOBAL_2D_ARRAY) ); tair = 0
+-      allocate(     Q(GLOBAL_2D_ARRAY) ); Q = 0
+-      allocate( prate(GLOBAL_2D_ARRAY) ); prate = 0
+-      allocate( evap(GLOBAL_2D_ARRAY) ); evap = 0
+-      allocate( lwrad(GLOBAL_2D_ARRAY) ); lwrad = 0
++      allocate(  tair(GLOBAL_2D_ARRAY) )
++      allocate(     Q(GLOBAL_2D_ARRAY) )
++      allocate( prate(GLOBAL_2D_ARRAY) )
++      allocate( evap(GLOBAL_2D_ARRAY) )
++      allocate( lwrad(GLOBAL_2D_ARRAY) )
+ 
+-      allocate( wspd_used(GLOBAL_2D_ARRAY) ); wspd_used = 0
++      allocate( wspd_used(GLOBAL_2D_ARRAY) )
+ 
+ !     vdata needs to be of global_2d_array size
+       allocate( nc_uwnd%vdata(GLOBAL_2D_ARRAY,2) )
+@@ -185,14 +185,14 @@
+       ! ----------------
+       use surf_flux, only:
+      &     srflx, vwnd, uwnd, stflx, sustr_r, svstr_r,
+-     &     sustr, svstr, apply_surf_field_corr, swflx
++     &     sustr, svstr, apply_surf_field_corr
+       use tracers, only: t
+       use grid, only: rmask, umask, vmask
+       use mixing, only:
+      &     east_exchng, ieast, isalt, itemp, iwest,
+      &     jnorth, jsouth, north_exchng, south_exchng, west_exchng
+       use ocean_vars, only: u, v
+-      use scalars, only: cp, g, n, nrhs, pi, rho0, vonkar, cmday2ms
++      use scalars, only: cp, g, n, nrhs, pi, rho0, vonkar
+ 
+       implicit none
+ 
+@@ -735,11 +735,8 @@
+ !  Total surface salt flux
+ !
+           evap(i,j)=-cp*hflat/Hlv
+-
+           ! Divide prate by 100.*3600.*24. to convert from [cm/day] to [m/s]
+-          swflx(i,j) = prate(i,j)*cmday2ms-evap(i,j)
+-          ! This is the old way of adding salt flux
+-!          stflx(i,j,isalt)=(evap(i,j)- ( prate(i,j)/(100.*3600.*24.) ) )*t(i,j,N,nrhs,isalt)
++          stflx(i,j,isalt)=(evap(i,j)- ( prate(i,j)/(100.*3600.*24.) ) )*t(i,j,N,nrhs,isalt)
+ #endif
+ # ifdef MASKING
+           stflx(i,j,itemp)=stflx(i,j,itemp)*rmask(i,j)
+diff --git a/src/flux_frc.F b/src/flux_frc.F
+index 37e6713..7a728c4 100644
+--- a/src/flux_frc.F
++++ b/src/flux_frc.F
+@@ -9,9 +9,8 @@
+ 
+       ! Modules needed:
+       use tracers, only: t
+-      use surf_flux, only: sustr, svstr, stflx, srflx, sss, sst,
+-     &       apply_surf_field_corr, swflx
+-      use scalars, only: cp, rho0, day2sec, n, nrhs, cmday2ms
++      use surf_flux, only: sustr, svstr, stflx, srflx, sss, sst, apply_surf_field_corr
++      use scalars, only: cp, rho0, day2sec, n, nrhs
+       use roms_read_write, only: ncforce, flux_frc_opt, set_frc_data,
+      &     store_string_att
+       use dimensions, only: i0, i1, j0, j1
+@@ -96,47 +95,43 @@
+       enddo
+ #endif
+ 
+-      ! Surface salinity flux
+-      call set_frc_data(nc_swflux,stflx(:,:,isalt),'r')
+-!     stflx(:,:,isalt) = stflx(:,:,isalt)*t(:,:,nz,nrhs,isalt)*cmday2ms
+-      swflx = -stflx(:,:,isalt)*cmday2ms
+-      stflx(:,:,isalt) = 0
+-
+       ! 2a) set bottom heat flux: stflx(itemp)
+ !     call set_frc_data(nc_bhflx,btflx(i0:i1,j0:j1,itemp),'r')
+ 
+       ! 3) set short-wave radiation flux
+       call set_srflux
+ 
+-!#ifdef SALINITY
+-!      ! 4) set water flux: stflx(isalt)
+-!      call set_swflux
+-!#endif
++#ifdef SALINITY
++      ! 4) set water flux: stflx(isalt)
++      call set_swflux
++#endif
+ 
+       ! 5) Apply sst and sss corrections, if desired
+       call apply_surf_field_corr
+ 
+       end subroutine set_flux_frc  !]
+ ! ----------------------------------------------------------------------
+-!      subroutine set_swflux  ![
+-!      ! set surface freshwater flux: stflx(isalt)
+-!
+-!      implicit none
+-!
+-!      ! local
+-!      integer i,j
+-!
+-!      call set_frc_data(nc_swflux,stflx(:,:,isalt),'r')
+-!
+-!      do j=j0,j1
+-!        do i=i0,i1
+-           ! cm/day -> m/s
+-!          stflx(i,j,isalt)=stflx(i,j,isalt)*t(i,j,N,nrhs,isalt)*cmday2ms
+-!           stflx(:,:,isalt) = 0
+-!        enddo
+-!      enddo
+-!
+-!      end subroutine set_swflux  !]
++      subroutine set_swflux  ![
++      ! set surface freshwater flux: stflx(isalt)
++
++      implicit none
++
++      ! local
++      integer i,j
++      real cmday2ms
++
++      call set_frc_data(nc_swflux,stflx(:,:,isalt),'r')
++      call error_log%abort_check()
++
++      cmday2ms=0.01/day2sec ! Set coefficient outside of loop for efficiency
++      do j=j0,j1
++        do i=i0,i1
++          ! cm/day -> m/s
++          stflx(i,j,isalt)=stflx(i,j,isalt)*t(i,j,N,nrhs,isalt)*cmday2ms
++        enddo
++      enddo
++
++      end subroutine set_swflux  !]
+ ! ----------------------------------------------------------------------
+       subroutine set_srflux  ![
+       ! set short-wave radiation flux
+diff --git a/src/frc_output.F b/src/frc_output.F
+index 1f6ca12..82436cd 100644
+--- a/src/frc_output.F
++++ b/src/frc_output.F
+@@ -21,7 +21,7 @@
+ #ifdef BULK_FRC
+       use bulk_frc, only: tair, q, lwrad, evap, prate
+ #endif
+-      use surf_flux, only: stflx, sustr, svstr, srflx, uwnd, vwnd, swflx
++      use surf_flux, only: stflx, sustr, svstr, srflx, uwnd, vwnd
+ 
+       implicit none
+       private
+@@ -53,12 +53,13 @@
+       real,allocatable,dimension(:,:) :: vflux_ALK_ALT_CO2_avg
+       real,allocatable,dimension(:,:) :: vflux_DIC_ALT_CO2_avg
+ #endif /* MARBL */
++#else
++      real,allocatable,dimension(:,:) :: swflx_avg
+ #endif
+       real,allocatable,dimension(:,:) :: sustr_avg
+       real,allocatable,dimension(:,:) :: svstr_avg
+       real,allocatable,dimension(:,:) :: shflx_avg
+       real,allocatable,dimension(:,:) :: srflx_avg
+-      real,allocatable,dimension(:,:) :: swflx_avg
+ 
+       integer,parameter :: prec = nf90_double  ! Precision of output variables (nf90_float/nf90_double)
+ 
+@@ -116,6 +117,9 @@
+         allocate(vflux_DIC_ALT_CO2_avg(GLOBAL_2D_ARRAY) )
+         vflux_DIC_ALT_CO2_avg(:,:)=0
+ #endif /* MARBL */
++#else
++        allocate(swflx_avg(GLOBAL_2D_ARRAY) )
++        swflx_avg(:,:)=0
+ #endif
+         allocate(sustr_avg(GLOBAL_2D_ARRAY) )
+         sustr_avg(:,:)=0
+@@ -125,8 +129,6 @@
+         shflx_avg(:,:)=0
+         allocate(srflx_avg(GLOBAL_2D_ARRAY) )
+         srflx_avg(:,:)=0
+-        allocate(swflx_avg(GLOBAL_2D_ARRAY) )
+-        swflx_avg(:,:)=0
+       endif ! do_avg
+       endif ! done
+ 
+@@ -154,7 +156,6 @@
+       uwnd_avg(:,:)  = uwnd_avg(:,:)*(1-coef)  + uwnd(:,:)*coef
+       vwnd_avg(:,:)  = vwnd_avg(:,:)*(1-coef)  + vwnd(:,:)*coef
+       ssflx_avg(:,:) = ssflx_avg(:,:)*(1-coef) + stflx(:,:,isalt)*coef
+-      swflx_avg(:,:) = swflx_avg(:,:)*(1-coef) + swflx(:,:)*coef
+ #ifdef TAU_CORRECTION
+       taux_avg(:,:)  = taux_avg(:,:)*(1-coef)  + taux(:,:)*coef
+       tauy_avg(:,:)  = tauy_avg(:,:)*(1-coef)  + tauy(:,:)*coef
+@@ -236,6 +237,9 @@
+       call ncwrite(ncid,'vflux_DIC_ALT_CO2',vflux_DIC_ALT_CO2_avg(i0:i1,j0:j1),(/1,1,record/))
+       vflux_DIC_ALT_CO2_avg(:,:) = 0
+ #endif /* MARBL */
++#else
++      call ncwrite(ncid,'swflx',swflx_avg(i0:i1,j0:j1),(/1,1,record/))
++      swflx_avg(:,:) = 0
+ #endif
+       call ncwrite(ncid,'sustr',sustr_avg(1:i1,j0:j1),(/1,1,record/))
+       sustr_avg(:,:) = 0
+@@ -245,8 +249,6 @@
+       shflx_avg(:,:) = 0
+       call ncwrite(ncid,'srflx',srflx_avg(i0:i1,j0:j1),(/1,1,record/))
+       srflx_avg(:,:) = 0
+-      call ncwrite(ncid,'swflx',swflx_avg(i0:i1,j0:j1),(/1,1,record/))
+-      swflx_avg(:,:) = 0
+       else
+ #ifdef BULK_FRC
+       call ncwrite(ncid,'tair',tair(i0:i1,j0:j1),(/1,1,record/))
+@@ -257,7 +259,6 @@
+       call ncwrite(ncid,'uwnd',uwnd(i0:i1,j0:j1),(/1,1,record/))
+       call ncwrite(ncid,'vwnd',vwnd(i0:i1,j0:j1),(/1,1,record/))
+       call ncwrite(ncid,'ssflx',stflx(i0:i1,j0:j1,isalt),(/1,1,record/))
+-      call ncwrite(ncid,'swflx',swflx(i0:i1,j0:j1),(/1,1,record/))
+ #ifdef TAU_CORRECTION
+       call ncwrite(ncid,'taux',taux(i0:i1,j0:j1),(/1,1,record/))
+       call ncwrite(ncid,'tauy',tauy(i0:i1,j0:j1),(/1,1,record/))
+@@ -336,7 +337,7 @@
+       ierr = nf90_put_att(ncid,varid,'units','kg/kg')
+ 
+       ! Input comes in units of:         cm day-1
+-      ! Output is written in units of:   m s-1
++      ! Output is written in units of:   cm day-1
+       varid = nccreate(ncid,'prate',(/dn_xr,dn_yr,dn_tm/),(/xi_rho,eta_rho,0/),prec)
+       ierr=nf90_put_att(ncid, varid, 'long_name',
+      &           'precipitation rate')
+@@ -405,13 +406,6 @@
+      &           'surface salt flux')
+       ierr = nf90_put_att(ncid,varid,'units','psi m s-1')
+ 
+-      ! Input comes in units of:         N/A (calculated)
+-      ! Output is written in units of:   m s-1
+-      varid = nccreate(ncid,'swflx',(/dn_xr,dn_yr,dn_tm/),(/xi_rho,eta_rho,0/),prec)
+-      ierr=nf90_put_att(ncid, varid, 'long_name',
+-     &           'surface freshwater flux')
+-      ierr = nf90_put_att(ncid,varid,'units','m s-1')
+-
+       ! Input comes in units of:         N/A (calculated)
+       ! Output is written in units of:   m2 s-2
+       varid = nccreate(ncid,'sustr',(/dn_xu,dn_yr,dn_tm/),(/xi_u,eta_rho,0/),prec)
+diff --git a/src/omega.F b/src/omega.F
+index 9ec53df..ebd5193 100644
+--- a/src/omega.F
++++ b/src/omega.F
+@@ -39,7 +39,7 @@
+      &     east_exchng, north_exchng, south_exchng,
+      &     west_exchng, ieast, iwest, jnorth, jsouth
+       use dimensions, only: nx, ny, nz
+-      use grid, only: pn, pm, dn_r, dm_r
++      use grid, only: pn, pm
+       use pipe_frc, only:
+      &     pidx, pipe_source, pipe_idx, pipe_prf,
+      &     pipe_flx
+@@ -51,7 +51,6 @@
+       use mpi_exchanges, only: exchange_xxx
+       use ocean_vars, only: wi, flxv, flxu, z_w, we, hz
+       use scalars, only: n, dt, forw_start, iic, nrhs
+-      use surf_flux, only: swflx
+ 
+       implicit none
+       integer istr,iend,jstr,jend, i,j,k, icdr, cidx
+@@ -111,10 +110,6 @@ c**     dtau=(1.-1./6.)*dt
+      &             +max(FlxV(i,j+1,k),0.)-min(FlxV(i,j,k),0.)
+           enddo
+         enddo
+-        ! rain water
+-        do i=1,nx
+-          Wi(i,j,nz) = Wi(i,j,nz) + swflx(i,j)*dm_r(i,j)*dn_r(i,j)
+-        enddo
+         do i=istr,iend
+           wrk(i)=Wi(i,j,N)/(z_w(i,j,N)-z_w(i,j,0))
+           Wi(i,j,N)=0.
+diff --git a/src/scalars.F b/src/scalars.F
+index 5b91345..4411fa4 100644
+--- a/src/scalars.F
++++ b/src/scalars.F
+@@ -125,9 +125,8 @@ C$OMP THREADPRIVATE( iif, nstp, nnew, nrhs )
+ 
+       real, parameter :: pi=3.14159265358979323, Eradius=6371315.,
+      &              deg2rad=pi/180., rad2deg=180./pi, day2sec=86400.,
+-     &                   sec2day=1./86400., Cp=3985., vonKar=0.41,
+-     &                   cmday2ms = 0.01/day2sec,
+-     &                   g=9.81 ! m/s^2
++     &                   sec2day=1./86400., Cp=3985., vonKar=0.41
++     &                 , g=9.81 ! m/s^2
+ #if defined(BIOLOGY_BEC2) || defined(MARBL)
+       real nmol_cm2_to_mmol_m2
+       parameter (nmol_cm2_to_mmol_m2 = 0.01)
+diff --git a/src/step2d_FB.F b/src/step2d_FB.F
+index 85cd08c..8a3481c 100644
+--- a/src/step2d_FB.F
++++ b/src/step2d_FB.F
+@@ -44,7 +44,6 @@
+       use ocean_vars, only: zeta, ubar, vbar
+       use scalars, only: dtfast, g, iif, knew, kstp, nfast
+       use mpi_exchanges, only: exchange_xxx
+-      use surf_flux, only: swflx
+ 
+       implicit none
+       integer istr,iend,jstr,jend, i,j, kbak, kold, icdr, cidx
+@@ -158,9 +157,8 @@
+ #endif
+       do j=jstrV-1,jend !! why are these from ...-1?
+         do i=istrU-1,iend
+-          zeta_new(i,j)=zeta(i,j,kstp) + dtfast*(pm(i,j)*pn(i,j)
++          zeta_new(i,j)=zeta(i,j,kstp) + dtfast*pm(i,j)*pn(i,j)
+      &            *(DUon(i,j)-DUon(i+1,j)+DVom(i,j)-DVom(i,j+1))
+-     &            + swflx(i,j) )
+           if (pipe_source) then          ! If pipe_source is false, the branch will
+             if (pipe_idx(i,j) > 0.) then ! be eliminated by compile optimization
+               zeta_new(i,j)=zeta_new(i,j) + dtfast*pm(i,j)*pn(i,j)*pipe_flx(i,j)
+diff --git a/src/step3d_t_ISO.F b/src/step3d_t_ISO.F
+index c3187f9..8102f04 100644
+--- a/src/step3d_t_ISO.F
++++ b/src/step3d_t_ISO.F
+@@ -96,8 +96,6 @@ c--# define CONST_TRACERS
+       use diagnostics, only: diag_trc, calc_diag, tdiag, tmixx, tadvx, tadvy,
+      &  tmixy, tadvy, tadvz, td, vflxd, zflx, tmixz, diag_t_adv_vc4, diag_t_adv_hc4
+ #endif
+-      use bulk_frc, only: tair
+-      use surf_flux, only: swflx
+       implicit none
+       integer icdr, cidx, istr,iend,jstr,jend, imin,imax,jmin,jmax, i,j,k!, td
+       real, dimension(PRIVATE_1D_SCRATCH_ARRAY,0:N) :: WC,FC,CF,DC
+@@ -936,19 +934,7 @@ c**               cff=1./(z_r(i,j,k+1)-z_r(i,j,k))
+             enddo
+           enddo
+ 
+-          ! Add in the heat of rain water. If using BULK_FRC, use the 2m air temperature;
+-          ! If using FLUX_FRC, just use the local water temperature
+-          if (itrc==itemp) then
+-            do i=istr,iend
+-              t(i,j,k,nnew,itrc)=t(i,j,k,nnew,itrc) +dt
+-     &            *swflx(i,j)
+-#ifdef BULK_FRC
+-     &            *tair(i,j)
+-#else
+-     &            *t(i,j,k,nnew,itrc)/Hz(i,j,nz)
+-#endif
+-            enddo
+-          endif
++
+ 
+ ! Start computation of vertical diffusion: add surface forcing fluxes
+ 
+diff --git a/src/surf_flux.F b/src/surf_flux.F
+index 9c8f0fa..ca6c410 100644
+--- a/src/surf_flux.F
++++ b/src/surf_flux.F
+@@ -41,7 +41,6 @@
+       real,public,allocatable,dimension(:,:)   :: svstr_r  ! rho-point, only used in lmd_kpp to get ustar
+       real,public,allocatable,dimension(:,:,:) :: stflx    ! Surface fluxes of tracer type variables (rho-points)
+       real,public,allocatable,dimension(:,:)   :: srflx    ! Short-wave radiation surface flux
+-      real,public,allocatable,dimension(:,:)   :: swflx ! Precip minus evaporation flux (surface water flux)
+ 
+       real,public,allocatable,dimension(:,:) ::  uwnd             ! time interpolated u-wind
+       real,public,allocatable,dimension(:,:) ::  vwnd             ! time interpolated v-wind
+@@ -55,7 +54,7 @@
+       real,allocatable,dimension(:,:)  :: sustr_avg     ! surf stress u-point average
+       real,allocatable,dimension(:,:)  :: svstr_avg     ! surf stress v-point average
+       real,allocatable,dimension(:,:,:):: stflx_avg     ! surf tracer flux average
+-      real,allocatable,dimension(:,:)  :: swflx_avg ! surf srw flux average
++
+ 
+       ! Sea-surface temperature (SST) and salinity (SSS) data for restoring
+       real,public,allocatable,dimension(:,:) :: sst
+@@ -83,15 +82,15 @@
+       implicit none
+ 
+       ! local
+-      allocate( uwnd  (GLOBAL_2D_ARRAY)     ); uwnd = 0
+-      allocate( vwnd  (GLOBAL_2D_ARRAY)     ); vwnd = 0
++      allocate( uwnd  (GLOBAL_2D_ARRAY)     );
++      allocate( vwnd  (GLOBAL_2D_ARRAY)     );
+       allocate( sustr  (GLOBAL_2D_ARRAY)    ); sustr=init
+       allocate( sustr_r(GLOBAL_2D_ARRAY)    ); sustr_r=init
+       allocate( svstr  (GLOBAL_2D_ARRAY)    ); svstr=init
+       allocate( svstr_r(GLOBAL_2D_ARRAY)    ); svstr_r=init
+       allocate( stflx  (GLOBAL_2D_ARRAY,nt) ); stflx=init
+       allocate( srflx  (GLOBAL_2D_ARRAY)    ); srflx=init
+-      allocate( swflx  (GLOBAL_2D_ARRAY)    ); swflx = 0
++
+ #if defined(Q_CORRECTION) && !defined(ANA_SST)
+       allocate( sst(GLOBAL_2D_ARRAY)        ); sst=init
+       allocate(nc_sst%vdata(GLOBAL_2D_ARRAY,2) )
+@@ -106,7 +105,6 @@
+         allocate(sustr_avg(1:i1,j0:j1))
+         allocate(svstr_avg(i0:i1,1:j1))
+         allocate(stflx_avg(i0:i1,j0:j1,nt))
+-        allocate(swflx_avg(i0:i1,j0:j1))
+       endif
+ 
+       end subroutine init_arrays_surf_flx  !]
+@@ -179,9 +177,6 @@
+       if (wrt_stflx) then  ! surface tracer fluxes
+         stflx_avg = stflx_avg*(1-coef)+stflx(i0:i1,j0:j1,:)*coef
+       endif
+-      if (wrt_swflx) then  ! surface water flux
+-        swflx_avg = swflx_avg*(1-coef)+swflx(i0:i1,j0:j1)*coef
+-      endif
+ 
+       end subroutine calc_sflx_avg !]
+ !----------------------------------------------------------------------
+@@ -222,13 +217,6 @@
+           ierr = nf90_put_att(ncid,varid,'units','PSU m/s')
+         endif
+       endif
+-      if (wrt_swflx) then
+-        varid = nccreate(ncid,'swflx',(/dn_xr,dn_yr,dn_tm/),
+-     &                 (/xi_rho,eta_rho,0/))
+-        ierr = nf90_put_att(ncid,varid,'long_name',
+-     &                            'Fresh water flux (P-E)')
+-        ierr = nf90_put_att(ncid,varid,'units','m/s')
+-      endif
+ 
+       end subroutine create_sflx_vars  !]
+ ! ----------------------------------------------------------------------
+@@ -275,9 +263,6 @@
+              call ncwrite(ncid,'ssflx',stflx_avg(:,:,2),start)
+             endif
+           endif
+-          if (wrt_swflx) then
+-            call ncwrite(ncid,'swflx',swflx_avg(:,:),start)
+-          endif
+         else  ! snapshots
+           if (wrt_smflx) then
+             call ncwrite(ncid,'sustr',sustr(1:i1,j0:j1),start)
+@@ -289,9 +274,6 @@
+              call ncwrite(ncid,'ssflx',stflx(i0:i1,j0:j1,2),start)
+             endif
+           endif
+-          if (wrt_swflx) then
+-            call ncwrite(ncid,'swflx',swflx(i0:i1,j0:j1),start)
+-          endif
+         endif
+         ierr=nf90_close(ncid)
+ 
+diff --git a/src/surf_flux.opt b/src/surf_flux.opt
+index ff7c803..36d92ec 100644
+--- a/src/surf_flux.opt
++++ b/src/surf_flux.opt
+@@ -4,7 +4,6 @@
+ 
+       logical,public,parameter :: wrt_smflx = .false.              ! output surface momentum flux
+       logical,public,parameter :: wrt_stflx = .false.              ! output surface tracer flux
+-      logical,public,parameter :: wrt_swflx = .false.              ! output surface water flux (P-E)
+       logical,parameter :: sflx_avg  = .false.              ! write averaged sflx data
+ 
+       real,parameter           :: output_period = 120       ! output averaging period in seconds
+diff --git a/tests/bgc_real/benchmark.result_github_gnu b/tests/bgc_real/benchmark.result_github_gnu
+index d597700..6c83f7c 100644
+--- a/tests/bgc_real/benchmark.result_github_gnu
++++ b/tests/bgc_real/benchmark.result_github_gnu
+@@ -11,6 +11,7 @@
+        LMD_BKPP                LMD_RIMIX               LMD_NONLOCAL
+        OBC_WEST                OBC_EAST                OBC_NORTH
+        OBC_SOUTH               OBC_M2FLATHER           OBC_M3ORLANSKI
++./print_output_logs.sh: line 31: bgc_real: command not found
+        OBC_TORLANSKI           Z_FRC_BRY               M2_FRC_BRY
+        M3_FRC_BRY              T_FRC_BRY               SPONGE
+        BIOLOGY_BEC2            BIOLOGY                 PCO2AIR_FORCING
+@@ -396,10 +397,10 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+ 
+ 
+   STEP KINETIC_ENRG     BAROTR_KE        MAX_ADV_CFL     MAX_VERT_CFL
+- 0  3.6229628195672916E-03 1.4392038342093960E-03 6.3834801906551136E-02 3.8256931144299920E-02
++ 0  3.6229628195672916E-03 1.4392038342093960E-03 6.3833781982263776E-02 3.8255911220012553E-02
+          set_frc :: zeta_east        input time (days) =   3654.00     rec =   2
+-         set_frc :: zeta_west        input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_east        input time (days) =   3655.00     rec =   3
++         set_frc :: zeta_west        input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_west        input time (days) =   3655.00     rec =   3
+          set_frc :: zeta_north       input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_north       input time (days) =   3655.00     rec =   3
+@@ -407,15 +408,15 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+          set_frc :: zeta_south       input time (days) =   3655.00     rec =   3
+        tides :: read all tides
+        ecosys_bec2_td:: computing bgc
+- 1  3.6230165778479949E-03 1.4392130225812207E-03 5.8787661818496852E-02 4.3314678969436061E-02
++ 1  3.6230165764642845E-03 1.4392130225301038E-03 5.8786445050160785E-02 4.3313436696380610E-02
+        ecosys_bec2_td:: computing bgc
+- 2  3.5817637139088239E-03 1.3982763660205560E-03 5.6249866765231624E-02 5.0386122714691749E-02
++ 2  3.5817630447720502E-03 1.3982763514559862E-03 5.6248002498950650E-02 5.0384208675385241E-02
+        ecosys_bec2_td:: computing bgc
+- 3  3.5246795966696206E-03 1.3412033738205613E-03 6.0366568966473626E-02 5.1835641479626722E-02
++ 3  3.5246779118408354E-03 1.3412033441358878E-03 6.0363773489668031E-02 5.1832771987926886E-02
+        ecosys_bec2_td:: computing bgc
+- 4  3.4755128681009956E-03 1.2918166196224151E-03 6.2992522742916779E-02 5.2823545194467386E-02
++ 4  3.4755095962035829E-03 1.2918165298361200E-03 6.2988518394321541E-02 5.2819449031077541E-02
+        ecosys_bec2_td:: computing bgc
+- 5  3.4397092052149227E-03 1.2555171853521408E-03 6.5309626880533531E-02 5.4979399622186592E-02
++ 5  3.4397035904285716E-03 1.2555170187978349E-03 6.5303883452899336E-02 5.4973555686781625E-02
+        ocean_vars :: wrote history, tdays =   3654.0012  step =      5 rec =   2
+        wrt_bgc_tracers :: history , trc =  PO4
+        wrt_bgc_tracers :: history , trc =  NO3
+@@ -423,23 +424,23 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+        wrt_bgc_tracers :: history , trc =  DIC
+        bgc :: wrote history, tdays =   3654.0012  step =      4 rec =   2
+        ecosys_bec2_td:: computing bgc
+- 6  3.4169458265513823E-03 1.2320460911766601E-03 6.7208910212247064E-02 5.6977184941235458E-02
++ 6  3.4169376541025114E-03 1.2320458675590675E-03 6.7201664118717266E-02 5.6969813245436533E-02
+        ecosys_bec2_td:: computing bgc
+- 7  3.4015462522997415E-03 1.2158076103216454E-03 7.0608293867517727E-02 5.8694765622249574E-02
++ 7  3.4015350331162162E-03 1.2158073672640041E-03 7.0599451883314068E-02 5.8685761449695159E-02
+        ecosys_bec2_td:: computing bgc
+- 8  3.3924538291388250E-03 1.2058021553132236E-03 7.3840384949926813E-02 6.0668555858555878E-02
++ 8  3.3924390268684516E-03 1.2058019444794695E-03 7.3829293387386266E-02 6.0657239353231765E-02
+        ecosys_bec2_td:: computing bgc
+- 9  3.3884554971978192E-03 1.2008134173221432E-03 7.8654726003167336E-02 5.0421201110960316E-02
++ 9  3.3884364781522694E-03 1.2008132913140829E-03 7.8639432086868688E-02 5.0406010835449613E-02
+        ecosys_bec2_td:: computing bgc
+-10  3.3886276598144712E-03 1.1999646142837191E-03 8.5613847007952854E-02 5.5745722986667461E-02
++10  3.3886049800886148E-03 1.1999646237532012E-03 8.5598031883502373E-02 5.5730054153631157E-02
+        ocean_vars :: wrote history, tdays =   3654.0023  step =     10 rec =   3
+        wrt_bgc_tracers :: history , trc =  PO4
+        wrt_bgc_tracers :: history , trc =  NO3
+        wrt_bgc_tracers :: history , trc =  O2
+        wrt_bgc_tracers :: history , trc =  DIC
+        bgc :: wrote history, tdays =   3654.0023  step =      9 rec =   3
+- Process    0  thread  0  cpu time =       45.25 sec
++ Process    0  thread  0  cpu time =       95.56 sec
+ 
+  MAIN: DONE - Records written:
+ 
+- MPI_run_time =   68.031659226000102
++ MPI_run_time =   145.13102154800001
+\ No newline at end of file
+diff --git a/tests/bgc_real/benchmark.result_github_ifx b/tests/bgc_real/benchmark.result_github_ifx
+index f88b4a2..ddf83ee 100644
+--- a/tests/bgc_real/benchmark.result_github_ifx
++++ b/tests/bgc_real/benchmark.result_github_ifx
+@@ -20,7 +20,6 @@
+        UPSTREAM_UV             SPLINE_UV
+  <step3d_uv2.F>
+        DELTA=0.28              EPSIL=0.36
+-./print_output_logs.sh: line 31: bgc_real: command not found
+  <step3d_t_ISO.F>
+        UPSTREAM_TS             SPLINE_TS
+  <set_depth.F>
+@@ -315,6 +314,7 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+      27  -4.6000E-01  -1.8761254E-01    -1.8761254E+19  -8.0951567E+00   9.3806268E+18   1.8761254E+19
+      26  -4.8000E-01  -2.1169704E-01    -2.1169704E+19  -8.6462129E+00   1.0584852E+19   2.1169704E+19
+      25  -5.0000E-01  -2.3801922E-01    -2.3801922E+19  -9.2252402E+00   1.1900961E+19   2.3801922E+19
++./print_output_logs.sh: line 31: bgc_real: command not found
+      24  -5.2000E-01  -2.6666485E-01    -2.6666485E+19  -9.8333106E+00   1.3333242E+19   2.6666485E+19
+      23  -5.4000E-01  -2.9769164E-01    -2.9769164E+19  -1.0471145E+01   1.4884582E+19   2.9769164E+19
+      22  -5.6000E-01  -3.3112002E-01    -3.3112002E+19  -1.1139000E+01   1.6556001E+19   3.3112002E+19
+@@ -397,26 +397,26 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+ 
+ 
+   STEP KINETIC_ENRG     BAROTR_KE        MAX_ADV_CFL     MAX_VERT_CFL
+- 0  3.6229628195672916E-03 1.4392038342093960E-03 6.3834801906551136E-02 3.8256931144299920E-02
++ 0  3.6229628195672916E-03 1.4392038342093960E-03 6.3833781982263776E-02 3.8255911220012553E-02
+          set_frc :: zeta_west        input time (days) =   3654.00     rec =   2
+-         set_frc :: zeta_west        input time (days) =   3655.00     rec =   3
+          set_frc :: zeta_east        input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_east        input time (days) =   3655.00     rec =   3
++         set_frc :: zeta_west        input time (days) =   3655.00     rec =   3
+          set_frc :: zeta_north       input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_north       input time (days) =   3655.00     rec =   3
+          set_frc :: zeta_south       input time (days) =   3654.00     rec =   2
+          set_frc :: zeta_south       input time (days) =   3655.00     rec =   3
+        tides :: read all tides
+        ecosys_bec2_td:: computing bgc
+- 1  3.6230165778479949E-03 1.4392130225812207E-03 5.8787661818496526E-02 4.3314678969435728E-02
++ 1  3.6230165764642845E-03 1.4392130225301038E-03 5.8786445050160480E-02 4.3313436696380284E-02
+        ecosys_bec2_td:: computing bgc
+- 2  3.5817637139088239E-03 1.3982763660205560E-03 5.6249866765230708E-02 5.0386122714690847E-02
++ 2  3.5817630447720493E-03 1.3982763514559862E-03 5.6248002498949526E-02 5.0384208675384110E-02
+        ecosys_bec2_td:: computing bgc
+- 3  3.5246795966696206E-03 1.3412033738205613E-03 6.0366568966471711E-02 5.1835641479624821E-02
++ 3  3.5246779118408354E-03 1.3412033441358880E-03 6.0363773489667129E-02 5.1832771987925970E-02
+        ecosys_bec2_td:: computing bgc
+- 4  3.4755128681009956E-03 1.2918166196224151E-03 6.2992522742915072E-02 5.2823545194465756E-02
++ 4  3.4755095962035829E-03 1.2918165298361200E-03 6.2988518394322721E-02 5.2819449031078616E-02
+        ecosys_bec2_td:: computing bgc
+- 5  3.4397092052149236E-03 1.2555171853521408E-03 6.5309626880534544E-02 5.4979399622187564E-02
++ 5  3.4397035904285716E-03 1.2555170187978349E-03 6.5303883452899864E-02 5.4973555686782125E-02
+        ocean_vars :: wrote history, tdays =   3654.0012  step =      5 rec =   2
+        wrt_bgc_tracers :: history , trc =  PO4
+        wrt_bgc_tracers :: history , trc =  NO3
+@@ -424,23 +424,23 @@ WARNING: unregistered keyword encountered: MARBL_biogeochemistry
+        wrt_bgc_tracers :: history , trc =  DIC
+        bgc :: wrote history, tdays =   3654.0012  step =      4 rec =   2
+        ecosys_bec2_td:: computing bgc
+- 6  3.4169458265513823E-03 1.2320460911766601E-03 6.7208910212249076E-02 5.6977184941237422E-02
++ 6  3.4169376541025123E-03 1.2320458675590677E-03 6.7201664118718363E-02 5.6969813245437595E-02
+        ecosys_bec2_td:: computing bgc
+- 7  3.4015462522997415E-03 1.2158076103216454E-03 7.0608293867521765E-02 5.8694765622253516E-02
++ 7  3.4015350331162162E-03 1.2158073672640043E-03 7.0599451883313458E-02 5.8685761449694583E-02
+        ecosys_bec2_td:: computing bgc
+- 8  3.3924538291388254E-03 1.2058021553132238E-03 7.3840384949933613E-02 6.0668555858562567E-02
++ 8  3.3924390268684516E-03 1.2058019444794699E-03 7.3829293387386044E-02 6.0657239353231557E-02
+        ecosys_bec2_td:: computing bgc
+- 9  3.3884554971978201E-03 1.2008134173221434E-03 7.8654726003174746E-02 5.0421201110967630E-02
++ 9  3.3884364781522694E-03 1.2008132913140831E-03 7.8639432086868355E-02 5.0406010835449259E-02
+        ecosys_bec2_td:: computing bgc
+-10  3.3886276598144721E-03 1.1999646142837194E-03 8.5613847007959765E-02 5.5745722986674406E-02
++10  3.3886049800886148E-03 1.1999646237532018E-03 8.5598031883502360E-02 5.5730054153631102E-02
+        ocean_vars :: wrote history, tdays =   3654.0023  step =     10 rec =   3
+        wrt_bgc_tracers :: history , trc =  PO4
+-       wrt_bgc_tracers :: history , trc =  NO3
++roms               0000000000413FA5  Unknown               Unknown         wrt_bgc_tracers :: history , trc =  NO3
+        wrt_bgc_tracers :: history , trc =  O2
+        wrt_bgc_tracers :: history , trc =  DIC
+        bgc :: wrote history, tdays =   3654.0023  step =      9 rec =   3
+- Process    0  thread  0  cpu time =       68.32 sec
++ Process    0  thread  0  cpu time =      369.15 sec
+ 
+  MAIN: DONE - Records written:
+ 
+- MPI_run_time =   103.481573010000
++ MPI_run_time =   548.995890618000
+\ No newline at end of file

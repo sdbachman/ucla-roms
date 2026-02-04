@@ -212,7 +212,7 @@
 
           do k=1,nz
             dpth = -z_r(i,j,k)
-            rho(k)=rho1(i,j,k)+qp1(i,j,k)*dpth !*(1.-qp2*dpth)
+            rho(k)=rho1(i,j,k)+qp1(i,j,k)*dpth*(1.-qp2*dpth)
           enddo
 
           do k=2,nz
@@ -239,7 +239,9 @@
 
           call dsterf(nz,D,E,info)
 
-          largest_eigenvalue = 1 / D(1)
+          ! Use the MAX function just in case we have all negative
+          ! eigenvalues
+          largest_eigenvalue = max(1/D(1),0.0)
 
           ! The disperion relation is
           ! \omega = \pm \sqrt(f^2 + \lambda K^2),
@@ -252,9 +254,9 @@
           fastest_bc_wavespeed(i,j) = sqrt(f(i,j)**2 / smallest_k2 + largest_eigenvalue)
 
 
-          if ((i==5) .and. (j==5)) then
-              write(*,*) "YAY", g_prime
-          endif
+!          if ((i==5) .and. (j==5)) then
+!              write(*,*) "YAY", g_prime
+!          endif
 
         enddo
       enddo
