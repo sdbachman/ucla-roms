@@ -369,10 +369,12 @@ CR      write(*,*)  ' -2' MYID
       ! we use these values at the end of pre_step, and during step2d
 
       tdays = (time-0.0*dt)*sec2day
+! Only update tracers at thermo timestep
       call set_bry_all
 
       if (bry_tides.or.pot_tides) call set_tides(0)
 
+! Only at every thermo timestep
       ! currrently, rho_eos works with t(nrhs), nrhs==nstp => time n
       call rho_eos(nrhs)
 
@@ -391,6 +393,7 @@ CR      write(*,*)  ' -2' MYID
 
       ! nrhs points to u/v at time level n
       call prsgrd
+! Only update tracers at thermo timestep
       call pre_step3d(0)  ! u is m/s here
 
       !! nnew ==n+1/2
@@ -407,6 +410,7 @@ CR      write(*,*)  ' -2' MYID
       !! nnew = n+1
       !! nrhs = n+1/2
       call omega
+! Only at thermo timestep      
       call rho_eos(nrhs)  !!! use the right time index
 
       tdays = (time-0.0*dt)*sec2day
@@ -446,7 +450,9 @@ CR      write(*,*)  ' -2' MYID
       call step3d_uv2(0)
 
       call omega
+! Only every thermo timestep      
       call step3d_t(0)
+! Only every thermo timestep      
 # if defined TS_DIF2 || defined TS_DIF4
       call t3dmix
 # endif
