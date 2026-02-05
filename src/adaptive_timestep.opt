@@ -6,5 +6,9 @@
 
       ! Settings for determining dt
       integer, parameter    :: dt_update_frequency = 5  ! Number of timesteps between recalculating dt
-      real, parameter       :: max_adv_CFL = 1          ! Maximum CFL number to use for the advective fluxes
+      real, parameter       :: max_adv_CFL = 1          ! Maximum CFL number to use for the advective fluxes.
                                                         ! Recommended to keep at 1 for stability 
+      real, parameter       :: max_bc_CFL = 1           ! Maximum CFL number to use for the baroclinic wave speed.
+                                                        ! Recommended to keep at 1 for stability
+      real, parameter       :: max_bt_CFL = 1           ! Maximum CFL number to use for the barotropic wave speed.
+                                                        ! Recommended to keep at 1 for stability

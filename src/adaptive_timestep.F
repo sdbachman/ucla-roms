@@ -9,11 +9,12 @@
       use dimensions, only: nx,ny,nz
       use scalars, only: dt, iic, g, rho0, pi
       use param, only: N,Lm,Mm,LLm, MMm, mynode, ocean_grid_comm
-      use grid, only: pn, pm, rmask, f
+      use grid, only: pn, pm, rmask, f, h
       use ocean_vars, only: Hz, We, Wi, FlxU, FlxV, z_r
       use mpi_f08, only: mpi_double_precision, mpi_max
       use eos_vars, only: rho1,qp1,qp2
-      use comm_vars, only: grdmax
+      use comm_vars, only: grdmin,grdmax
+      use mixing, only: bvf
 
       implicit none
 
@@ -23,7 +24,11 @@
 
       real :: Cu_Adv=0    ! Advective CFL number
       real,allocatable,dimension(:,:) :: fastest_bc_wavespeed
-      real :: smallest_k2
+      real,allocatable,dimension(:,:) :: fastest_bt_wavespeed
+      real :: fastest_bc_wavespeed_global
+      real :: fastest_bt_wavespeed_global
+      real :: smallest_wavenumber
+
       public set_adaptive_dt
 
       contains
@@ -37,16 +42,35 @@
 
       implicit none
 
-!      integer, intent(in)                 :: N_src
-
       ! local
-      real :: dt_adv 
+      integer :: i,j,ierr
+      real :: dt_adv, dt_bc, dt_bt
       logical,save :: done=.false.
 
       if (.not. done) then
         allocate( fastest_bc_wavespeed(GLOBAL_2D_ARRAY) );
         fastest_bc_wavespeed(:,:) = 0
-        smallest_k2 = (2*pi/(grdmax*LLm))**2+(2*pi/(grdmax*MMm))**2
+
+        allocate( fastest_bt_wavespeed(GLOBAL_2D_ARRAY) );
+        fastest_bt_wavespeed(:,:) = 0
+
+        smallest_wavenumber = 2*pi/(grdmax*MAX(LLm,MMm))
+
+        ! Calculate fastest barotropic wave speed
+        ! Find global maximum
+
+        do j=1,ny
+          do i=1,nx        
+            fastest_bt_wavespeed(i,j) = sqrt((f(i,j)/smallest_wavenumber)**2 + g*h(i,j))
+          enddo
+        enddo
+
+        call MPI_Reduce(fastest_bt_wavespeed, fastest_bt_wavespeed_global, 1, mpi_double_precision,
+     &    MPI_MAX, 0, ocean_grid_comm, ierr)
+
+        ! Broadcast rank where minimum occurs to all processes
+        call MPI_Bcast(fastest_bt_wavespeed_global,1,mpi_double_precision,0,ocean_grid_comm,ierr)
+
         done=.true.
       endif
 
@@ -59,48 +83,15 @@
 
       dt_adv = max_adv_CFL * dt / MAX(Cu_Adv,1e-10)   ! Don't divide by zero 
 
-      write(*,*) "YAY1", dt_adv
-
       ! ------ Maximum timestep based on baroclinic wave speed ------ 
       call calc_bc_wave_speed
 
+      dt_bc = max_bc_CFL * grdmin / fastest_bc_wavespeed_global
 
+      ! ------ Maximum barotropic timestep based on barotropic wave speed ------ 
+      dt_bt = max_bt_CFL * grdmin / fastest_bt_wavespeed_global
 
-
-      ! DSTERF computes all eigenvalues of a symmetric tridiagonal matrix
-      ! using the Pal-Walker-Kahan variant of the QL or QR algorithm.
-
-      ! SUBROUTINE DSTERF( N, D, E, INFO )
-
-      ! Arguments
-      !  =========
-
-      !  N       (input) INTEGER
-      !    The order of the matrix.  N >= 0.
-
-      !  D       (input/output) DOUBLE PRECISION array, dimension (N)
-      !    On entry, the n diagonal elements of the tridiagonal matrix.
-      !    On exit, if INFO = 0, the eigenvalues in ascending order.
-
-      !  E       (input/output) DOUBLE PRECISION array, dimension (N-1)
-      !    On entry, the (n-1) subdiagonal elements of the tridiagonal
-      !    matrix.
-      !    On exit, E has been destroyed.
-      !  INFO    (output) INTEGER
-      !    = 0:  successful exit
-      !    < 0:  if INFO = -i, the i-th argument had an illegal value
-      !    > 0:  the algorithm failed to find all of the eigenvalues in
-      !          a total of 30*N iterations; if INFO = i, then i
-      !          elements of E have not converged to zero.
-
-!      do i = 2,N
-!        D(i) = i
-!        E(i) = i
-!      enddo
-
-!      call dsterf(N,D,E,info)
-
-
+      write(*,*) "YAY1", dt_adv, dt_bc, dt_bt      
 
       end subroutine set_adaptive_dt !]
 !-------------------------------------------------------------------
@@ -201,19 +192,34 @@
       integer :: i,j,k
       integer :: info, ierr
       real :: dpth, largest_eigenvalue
+      real :: smallest_positive
+      real :: fastest_local
       real, dimension(N) :: D=0
+      logical, dimension(N) :: is_positive
       real, dimension(N) :: rho
       real, dimension(N-1) :: E=0
       real, dimension(2:N) :: g_prime
-      
+      real :: tot, N_sum, dist    
 
       do j=1,ny
         do i=1,nx
 
+          N_sum = 0
+          dist = 0
+          tot = 0
           do k=1,nz
             dpth = -z_r(i,j,k)
             rho(k)=rho1(i,j,k)+qp1(i,j,k)*dpth*(1.-qp2*dpth)
+
+            N_sum = N_sum + 0.5*(bvf(i,j,k)+bvf(i,j,k-1))*Hz(i,j,k) 
+            dist = dist + Hz(i,j,k)
+            if (N_sum>0) then
+              tot = tot + sqrt(N_sum/dist)*dist
+              N_sum = 0
+              dist = 0
+            endif
           enddo
+          tot = tot/pi
 
           do k=2,nz
             g_prime(k)= g * (rho(k-1)-rho(k)) / rho0
@@ -232,16 +238,13 @@
           E(1) = -1 / (g_prime(nz)*sqrt(Hz(i,j,nz)*Hz(i,j,nz-1)))
           D(1) = E(1) + 1/(g*Hz(i,j,nz))        
           do k=2,nz-1
-            E(k) = -1 / (g_prime(nz-k+1)*sqrt(Hz(i,j,nz-k+1)*Hz(i,j,nz-k))) 
+            E(k) = -1 / (g_prime(nz-k+1)*sqrt(Hz(i,j,nz-k+1)*Hz(i,j,nz-k)))
             D(k) = -(E(k) + E(k-1))
           enddo
           D(nz) = -E(nz-1)
 
           call dsterf(nz,D,E,info)
 
-          ! Use the MAX function just in case we have all negative
-          ! eigenvalues
-          largest_eigenvalue = max(1/D(1),0.0)
 
           ! The disperion relation is
           ! \omega = \pm \sqrt(f^2 + \lambda K^2),
@@ -249,26 +252,38 @@
           ! so the baroclinic wave speed will be
           ! \omega/K = \pm \sqrt(f^2/K^2 + \lambda)
           ! The fastest wave speed will be associated with the smallest
-          ! possible value of K^2 = (2*pi/Lx)**2 + (2*pi/Ly)**2
+          ! possible value of K^2 = (2*pi/MAX(Lx,Ly))**2          
 
-          fastest_bc_wavespeed(i,j) = sqrt(f(i,j)**2 / smallest_k2 + largest_eigenvalue)
+          ! Find the smallest positive
+          is_positive = D > 0.0
+
+          if (ANY(is_positive)) then
+            smallest_positive = MINVAL(D, MASK=is_positive)
+!            fastest_bc_wavespeed(i,j) = sqrt((f(i,j)/smallest_wavenumber)**2 + 1/smallest_positive)
+            fastest_bc_wavespeed(i,j) = sqrt(1.0/smallest_positive)
+          else
+            fastest_bc_wavespeed(i,j) = 0
+          endif
 
 
-!          if ((i==5) .and. (j==5)) then
-!              write(*,*) "YAY", g_prime
-!          endif
+          !if ((i==5) .and. (j==5)) then
+          !    do k=1,nz
+          !    write(*,*) "Y", k, D(k)
+          !    enddo
+          !endif
 
         enddo
       enddo
-!
-!      ! Find global maximum
-!      call MPI_Reduce(my_Cu_Adv, Cu_Adv, 1, mpi_double_precision,
-!     &  MPI_MAX, 0, ocean_grid_comm, ierr)
-!
-!      ! Broadcast rank where minimum occurs to all processes
-!      call MPI_Bcast(Cu_Adv,1,mpi_double_precision,0,ocean_grid_comm,ierr)
+
+      fastest_local = MAXVAL(fastest_bc_wavespeed)
+
+      ! Find global maximum
+      call MPI_Reduce(fastest_local, fastest_bc_wavespeed_global, 1, mpi_double_precision,
+     &  MPI_MAX, 0, ocean_grid_comm, ierr)
+
+      ! Broadcast rank where minimum occurs to all processes
+      call MPI_Bcast(fastest_bc_wavespeed_global,1,mpi_double_precision,0,ocean_grid_comm,ierr)
 
       end subroutine calc_bc_wave_speed !]
 !-------------------------------------------------------------------
-
       end module adaptive_timestep
