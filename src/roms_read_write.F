@@ -47,9 +47,6 @@
       character(len=21) :: refdatestr
       integer :: offset = 0
 
-      real,parameter :: eps=1e-2 ! prevent rounding error failures in get_frc_data
-
-
       ! Type ncforce contains all required netcdf variables and input data array for frc variable.
       ! Set the name and time_name of variable to match what is in the input forcing files.
       ! Use same name as bulk_frc variable name, e.g. uwnd has nc_uwnd for netcdf vars.
@@ -371,7 +368,7 @@
 
         var1d = cff1*nc%vdata(:,1,it1) + cff2*nc%vdata(:,1,it2)
 
-        if (vtimes(it1)>modtime+eps.or.vtimes(it2)<modtime-eps) then
+        if (vtimes(it1)>(modtime+dt).or.vtimes(it2)<(modtime-dt)) then
            write(error_info,*) 'set_frc_data :: ', nc%vname,frcfile(nc%ifile),
      &          'set_frc_data :: ', vtimes(it1), vtimes(it2), modtime,
      &          ". time interpolation_error"
@@ -453,7 +450,7 @@
 
         var2d = cff1*nc%vdata(:,:,it1) + cff2*nc%vdata(:,:,it2)
 
-        if (vtimes(it1)>modtime+eps.or.vtimes(it2)<modtime-eps) then
+        if (vtimes(it1)>(modtime+dt).or.vtimes(it2)<(modtime-dt)) then
            write(error_info,*) 'set_frc_data :: ', nc%vname,frcfile(nc%ifile),
      &          'set_frc_data :: ', vtimes(it1), vtimes(it2), modtime,
      &          ". time interpolation_error"
@@ -532,7 +529,7 @@
         cff2=( modtime-vtimes(it1) )/( vtimes(it2)-vtimes(it1) )
         var3d = cff1*nc%vdata(:,:,:,it1) + cff2*nc%vdata(:,:,:,it2)
 
-        if (vtimes(it1)>modtime+eps.or.vtimes(it2)<modtime-eps) then
+        if (vtimes(it1)>(modtime+dt).or.vtimes(it2)<(modtime-dt)) then
            write(error_info,*) 'set_frc_data :: ', nc%vname,frcfile(nc%ifile),
      &          'set_frc_data :: ', vtimes(it1), vtimes(it2), modtime,
      &          ". time interpolation error"
@@ -612,7 +609,7 @@
 
         var2d = cff1*nc%vdata(:,:,it1) + cff2*nc%vdata(:,:,it2)
 
-        if (vtimes(it1)>modtime+eps.or.vtimes(it2)<modtime-eps) then
+        if (vtimes(it1)>(modtime+dt).or.vtimes(it2)<(modtime-dt)) then
            write(error_info,*) 'set_frc_data :: ', nc%vname,frcfile(nc%ifile),
      &          'set_frc_data :: ', vtimes(it1), vtimes(it2), modtime,
      &          ". time interpolation error"
