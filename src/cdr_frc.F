@@ -18,7 +18,7 @@
       use dimensions, only: nx, ny, nz
       use ocean_vars, only: hz, z_r0, hz0
       use param, only: mynode, lm, mm, ocean_grid_comm
-      use nc_read_write, only: ncread
+      use nc_read_write, only: nf90_open_clear, ncread
       use marbl_driver, only: iALK, iDIC
       use vertical_remapping, only: remap_src_to_grid
       use error_handling_mod, only: error_log
@@ -160,7 +160,7 @@
       else
 
         ! Open file
-        ierr=nf90_open(cdr_file, nf90_nowrite, ncid)
+        ierr=nf90_open_clear(cdr_file, nf90_nowrite, ncid)
         call error_log%check_netcdf_status(
      &       netcdf_status=ierr,
      &       info="Cannot open CDR forcing file",

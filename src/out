@@ -1,0 +1,1216 @@
+diff --git a/src/Make.depend b/src/Make.depend
+index 833e5c57..ea211b4c 100644
+--- a/src/Make.depend
++++ b/src/Make.depend
+@@ -1,90 +1,100 @@
+-param.o : param.F param.opt set_global_definitions.h cppdefs.opt
+-dimensions.o : dimensions.F set_global_definitions.h cppdefs.opt hidden_mpi_vars.o param.o
+-ocean_vars.o : ocean_vars.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-tracers.o : tracers.F tracers.opt bgc_tracers_indx.opt set_global_definitions.h cppdefs.opt mpi_exchanges.o roms_read_write.o nc_read_write.o scalars.o surf_flux.o dimensions.o param.o
+-boundary.o : boundary.F set_global_definitions.h cppdefs.opt scalars.o tracers.o dimensions.o roms_read_write.o param.o
+-buffer.o : buffer.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-comm_vars.o : comm_vars.F set_global_definitions.h cppdefs.opt param.o
+-coupling.o : coupling.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-diag_vars.o : diag_vars.F set_global_definitions.h cppdefs.opt
+-eos_vars.o : eos_vars.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-grid.o : grid.F ana_grid.h set_global_definitions.h cppdefs.opt mpi_exchanges.o scalars.o pipe_frc.o roms_read_write.o dimensions.o nc_read_write.o param.o
+-hidden_mpi_vars.o : hidden_mpi_vars.F set_global_definitions.h cppdefs.opt param.o
+-mess_buffers.o : mess_buffers.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-mixing.o : mixing.F set_global_definitions.h cppdefs.opt tracers.o scalars.o param.o
+-mpi_test_arr.o : mpi_test_arr.F set_global_definitions.h cppdefs.opt param.o
+-private_scratch.o : private_scratch.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-basic_output.o : basic_output.F ocean_vars.opt set_global_definitions.h cppdefs.opt dimensions.o private_scratch.o coupling.o tracers.o grid.o work_mod.o eos_vars.o mixing.o ocean_vars.o scalars.o diagnostics.o sponge_tune.o roms_read_write.o nc_read_write.o param.o
+-scalars.o : scalars.F set_global_definitions.h cppdefs.opt param.o
+-scoord.o : scoord.F set_global_definitions.h cppdefs.opt param.o
+-strings.o : strings.F
+-work_mod.o : work_mod.F set_global_definitions.h cppdefs.opt scalars.o param.o
+-nc_read_write.o : nc_read_write.F nc_read_write.opt set_global_definitions.h cppdefs.opt param.o
+-surf_flux.o : surf_flux.F surf_flux.opt set_global_definitions.h cppdefs.opt scalars.o nc_read_write.o roms_read_write.o dimensions.o param.o
+-bulk_frc.o : bulk_frc.F compute_extended_bounds.h bulk_frc.opt set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o tracers.o surf_flux.o roms_read_write.o mpi_exchanges.o dimensions.o param.o
+-flux_frc.o : flux_frc.F flux_frc.opt set_global_definitions.h cppdefs.opt grid.o roms_read_write.o scalars.o surf_flux.o tracers.o dimensions.o param.o
+-tides.o : tides.F ana_tide.h compute_auxiliary_bounds.h compute_tile_bounds.h tides.opt set_global_definitions.h cppdefs.opt dimensions.o boundary.o private_scratch.o hidden_mpi_vars.o grid.o mpi_exchanges.o roms_read_write.o nc_read_write.o scalars.o param.o
+-bgc_io.o : bgc_io.F compute_extended_bounds.h set_global_definitions.h cppdefs.opt comm_vars.o bgc_forces.o ocean_vars.o dimensions.o scalars.o roms_read_write.o nc_read_write.o bgc_shared_vars.o tracers.o param.o
+-analytical.o : analytical.F compute_extended_bounds.h ana_vmix.h ana_init.h set_global_definitions.h cppdefs.opt surf_flux.o eos_vars.o boundary.o mixing.o tracers.o scalars.o grid.o ocean_vars.o param.o
+-diagnostics.o : diagnostics.F diagnostics.opt set_global_definitions.h cppdefs.opt eos_vars.o param.o coupling.o tides.o grid.o roms_read_write.o nc_read_write.o hidden_mpi_vars.o scalars.o ocean_vars.o tracers.o dimensions.o
+-step2d_FB.o : step2d_FB.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt mpi_exchanges.o scalars.o ocean_vars.o mixing.o grid.o coupling.o tides.o pipe_frc.o river_frc.o private_scratch.o hidden_mpi_vars.o param.o
+-read_inp.o : read_inp.F set_global_definitions.h cppdefs.opt strings.o roms_read_write.o scoord.o scalars.o basic_output.o eos_vars.o boundary.o tracers.o surf_flux.o param.o
+-set_weights.o : set_weights.F set_global_definitions.h cppdefs.opt scalars.o coupling.o param.o
+-set_scoord.o : set_scoord.F set_global_definitions.h cppdefs.opt scoord.o scalars.o comm_vars.o param.o
+-init_scalars.o : init_scalars.F set_global_definitions.h cppdefs.opt dimensions.o roms_read_write.o scalars.o mixing.o comm_vars.o boundary.o bgc_io.o param.o
+-init_arrays.o : init_arrays.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt bgc_io.o bgc_forces.o bgc_shared_vars.o pipe_frc.o flux_frc.o dimensions.o mess_buffers.o buffer.o boundary.o work_mod.o scalars.o basic_output.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o tracers.o surf_flux.o bulk_frc.o private_scratch.o hidden_mpi_vars.o param.o
+-setup_grid1.o : setup_grid1.F compute_auxiliary_bounds.h compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o grid.o hidden_mpi_vars.o param.o
+-setup_grid2.o : setup_grid2.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o grid.o comm_vars.o private_scratch.o hidden_mpi_vars.o param.o
+-set_nudgcof.o : set_nudgcof.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o mixing.o mpi_exchanges.o private_scratch.o hidden_mpi_vars.o grid.o param.o
+-sponge_tune.o : sponge_tune.F sponge_tune.opt set_global_definitions.h cppdefs.opt param.o grid.o mixing.o hidden_mpi_vars.o roms_read_write.o diagnostics.o dimensions.o scalars.o nc_read_write.o
+-roms_read_write.o : roms_read_write.F set_global_definitions.h cppdefs.opt strings.o scoord.o eos_vars.o param.o mpi_exchanges.o hidden_mpi_vars.o dimensions.o nc_read_write.o scalars.o
+-extract_data.o : extract_data.F extract_data.opt set_global_definitions.h cppdefs.opt diagnostics.o scalars.o basic_output.o ocean_vars.o tracers.o roms_read_write.o nc_read_write.o grid.o dimensions.o
+-prsgrd.o : prsgrd.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o grid.o eos_vars.o ocean_vars.o coupling.o diagnostics.o tides.o dimensions.o private_scratch.o hidden_mpi_vars.o param.o
+-pre_step3d4S.o : pre_step3d4S.F track_advec_switches.h compute_vert_rhs_uv_terms.h compute_vert_tracer_fluxes.h compute_rd_bott_drag.h compute_horiz_rhs_uv_terms.h compute_horiz_tracer_fluxes.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o scalars.o ocean_vars.o mixing.o grid.o coupling.o diagnostics.o tracers.o surf_flux.o river_frc.o dimensions.o private_scratch.o hidden_mpi_vars.o param.o
+-step3d_uv1.o : step3d_uv1.F track_advec_switches.h compute_vert_rhs_uv_terms.h compute_horiz_rhs_uv_terms.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o scalars.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o surf_flux.o dimensions.o diagnostics.o private_scratch.o hidden_mpi_vars.o param.o
+-step3d_uv2.o : step3d_uv2.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o surf_flux.o scalars.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o diagnostics.o dimensions.o river_frc.o private_scratch.o hidden_mpi_vars.o param.o
+-step3d_t_ISO.o : step3d_t_ISO.F track_advec_switches.h compute_vert_tracer_fluxes.h compute_horiz_tracer_fluxes.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o scalars.o ocean_vars.o mixing.o grid.o eos_vars.o diagnostics.o tracers.o surf_flux.o river_frc.o pipe_frc.o private_scratch.o hidden_mpi_vars.o param.o
+-set_depth.o : set_depth.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o diagnostics.o dimensions.o scoord.o scalars.o ocean_vars.o grid.o coupling.o private_scratch.o hidden_mpi_vars.o param.o
+-omega.o : omega.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o pipe_frc.o private_scratch.o hidden_mpi_vars.o param.o
+-visc3d_S.o : visc3d_S.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o coupling.o diagnostics.o dimensions.o private_scratch.o hidden_mpi_vars.o param.o
+-t3dmix_S.o : t3dmix_S.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt diagnostics.o tracers.o scalars.o ocean_vars.o mixing.o grid.o private_scratch.o hidden_mpi_vars.o param.o
+-particles.o : particles.F particles.opt set_global_definitions.h cppdefs.opt nc_read_write.o grid.o hidden_mpi_vars.o scalars.o ocean_vars.o dimensions.o
+-zetabc.o : zetabc.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o
+-u2dbc_im.o : u2dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o
+-v2dbc_im.o : v2dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o
+-u3dbc_im.o : u3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o scalars.o ocean_vars.o grid.o boundary.o param.o
+-v3dbc_im.o : v3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o scalars.o ocean_vars.o grid.o boundary.o param.o
+-w3dbc_im.o : w3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o
+-t3dbc_im.o : t3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o scalars.o ocean_vars.o grid.o boundary.o tracers.o param.o
+-rho_eos.o : rho_eos.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o tracers.o private_scratch.o hidden_mpi_vars.o param.o
+-alfabeta.o : alfabeta.F set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o eos_vars.o tracers.o param.o
+-lmd_vmix.o : lmd_vmix.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o tracers.o private_scratch.o hidden_mpi_vars.o param.o
+-lmd_kpp.o : lmd_kpp.F lmd_wscale_wm_and_ws.h lmd_kpp_smooth_hbl.h lmd_wscale_ws_only.h set_global_definitions.h cppdefs.opt strings.o scalars.o ocean_vars.o mixing.o grid.o surf_flux.o param.o
+-lmd_swr_frac.o : lmd_swr_frac.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt mpi_exchanges.o ocean_vars.o mixing.o private_scratch.o hidden_mpi_vars.o param.o
+-diag.o : diag.F diag.opt compute_tile_bounds.h set_global_definitions.h cppdefs.opt ocean_vars.o grid.o eos_vars.o diag_vars.o comm_vars.o scalars.o private_scratch.o hidden_mpi_vars.o param.o
+-timers.o : timers.F set_global_definitions.h cppdefs.opt scalars.o comm_vars.o param.o
+-wvlcty.o : wvlcty.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o private_scratch.o hidden_mpi_vars.o param.o
+-grid_stiffness.o : grid_stiffness.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt ocean_vars.o grid.o comm_vars.o hidden_mpi_vars.o param.o
+-lenstr.o : lenstr.F
+-get_date.o : get_date.F set_global_definitions.h cppdefs.opt
+-ext_copy_prv2shr.o : ext_copy_prv2shr.F compute_extended_bounds.h set_global_definitions.h cppdefs.opt param.o
+-check_switches2.o : check_switches2.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o strings.o hidden_mpi_vars.o param.o
+-mpi_setup.o : mpi_setup.F set_global_definitions.h cppdefs.opt roms_read_write.o hidden_mpi_vars.o param.o
+-river_frc.o : river_frc.F ana_frc_river.h river_frc.opt set_global_definitions.h cppdefs.opt grid.o scalars.o nc_read_write.o roms_read_write.o dimensions.o
+-pipe_frc.o : pipe_frc.F ana_pipe_frc.h pipe_frc.opt set_global_definitions.h cppdefs.opt scalars.o nc_read_write.o roms_read_write.o dimensions.o
+-add_git_hash.o : add_git_hash.F nc_read_write.o roms_read_write.o
+-random_output.o : random_output.F random_output.opt set_global_definitions.h cppdefs.opt diagnostics.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o param.o
+-cdr_output.o : cdr_output.F cdr_output.opt set_global_definitions.h cppdefs.opt diagnostics.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o param.o
+-mpi_exchanges.o : mpi_exchanges.F hidden_mpi_vars.o dimensions.o param.o
+-zslice_output.o : zslice_output.F zslice_output.opt set_global_definitions.h cppdefs.opt surf_flux.o tracers.o diagnostics.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o grid.o param.o
+-bgc_shared_vars.o : bgc_shared_vars.F bgc_3Ddiagnostics.opt bgc_2Ddiagnostics.opt bgc.opt set_global_definitions.h cppdefs.opt roms_read_write.o tracers.o param.o marbl_driver.o bec2_vars.o
+-bgc_forces.o : bgc_forces.F set_global_definitions.h cppdefs.opt param.o
+-bec2_params.o : bec2_params.F set_global_definitions.h cppdefs.opt
+-bgc_ecosys_bec2.o : bgc_ecosys_bec2.F set_global_definitions.h cppdefs.opt bec2_params.o bgc_shared_vars.o scalars.o ocean_vars.o grid.o param.o
+-marbl_driver.o : marbl_driver.F set_global_definitions.h cppdefs.opt
+-main.o : main.F set_global_definitions.h cppdefs.opt mixing.o tides.o zslice_output.o surf_flux.o extract_data.o bgc_io.o bec2_params.o random_output.o particles.o boundary.o diagnostics.o analytical.o grid.o dimensions.o basic_output.o ocean_vars.o scalars.o sponge_tune.o tracers.o param.o
+-checkdims.o : checkdims.F compute_starts_counts.h set_global_definitions.h cppdefs.opt scoord.o nc_read_write.o roms_read_write.o param.o
+-insert_node.o : insert_node.F insert_node.F
+-get_init.o : get_init.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt dimensions.o roms_read_write.o nc_read_write.o sponge_tune.o diagnostics.o bgc_shared_vars.o scalars.o basic_output.o ocean_vars.o mixing.o analytical.o hidden_mpi_vars.o grid.o coupling.o bgc_io.o tracers.o param.o
+-set_forces.o : set_forces.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt boundary.o analytical.o scalars.o hidden_mpi_vars.o bgc_io.o tides.o pipe_frc.o river_frc.o tracers.o surf_flux.o flux_frc.o bulk_frc.o param.o
+-closecdf.o : closecdf.F set_global_definitions.h cppdefs.opt scalars.o param.o
++zslice_output.o : zslice_output.F zslice_output.opt set_global_definitions.h cppdefs.opt error_handling_mod.o tracers.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o mpi_exchanges.o param.o grid.o 
++zetabc.o : zetabc.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o param.o 
++wvlcty.o : wvlcty.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o private_scratch.o hidden_mpi_vars.o param.o 
++work_mod.o : work_mod.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++w3dbc_im.o : w3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o 
++visc3d_S.o : visc3d_S.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o coupling.o private_scratch.o hidden_mpi_vars.o param.o 
++vertical_remapping.o : vertical_remapping.F set_global_definitions.h cppdefs.opt dimensions.o 
++v3dbc_im.o : v3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o scalars.o ocean_vars.o grid.o boundary.o param.o 
++v2dbc_im.o : v2dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o 
++upscale_output.o : upscale_output.F compute_tile_bounds.h upscale_output.opt set_global_definitions.h cppdefs.opt hidden_mpi_vars.o scalars.o basic_output.o ocean_vars.o marbl_driver.o roms_read_write.o nc_read_write.o grid.o dimensions.o tracers.o param.o 
++u3dbc_im.o : u3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt grid.o dimensions.o sponge_tune.o scalars.o ocean_vars.o hidden_mpi_vars.o boundary.o param.o 
++u2dbc_im.o : u2dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o grid.o boundary.o param.o 
++tracers.o : tracers.F tracers.opt bgc_tracers_indx.opt set_global_definitions.h cppdefs.opt error_handling_mod.o marbl_driver.o roms_read_write.o nc_read_write.o scalars.o surf_flux.o dimensions.o param.o 
++timers.o : timers.F set_global_definitions.h cppdefs.opt scalars.o comm_vars.o param.o 
++tides.o : tides.F ana_tide.h compute_auxiliary_bounds.h compute_tile_bounds.h tides.opt set_global_definitions.h cppdefs.opt nc_read_write.o mpi_exchanges.o error_handling_mod.o dimensions.o boundary.o private_scratch.o hidden_mpi_vars.o grid.o roms_read_write.o scalars.o param.o 
++t3dmix_S.o : t3dmix_S.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt diagnostics.o tracers.o scalars.o ocean_vars.o mixing.o mpi_exchanges.o grid.o private_scratch.o hidden_mpi_vars.o param.o 
++t3dbc_im.o : t3dbc_im.F compute_auxiliary_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o scalars.o ocean_vars.o grid.o dimensions.o boundary.o tracers.o param.o 
++surf_flux.o : surf_flux.F surf_flux.opt set_global_definitions.h cppdefs.opt error_handling_mod.o scalars.o nc_read_write.o roms_read_write.o dimensions.o param.o 
++strings.o : strings.F 
++step3d_uv2.o : step3d_uv2.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o mpi_exchanges.o scalars.o mixing.o ocean_vars.o grid.o coupling.o eos_vars.o river_frc.o private_scratch.o hidden_mpi_vars.o param.o 
++step3d_uv1.o : step3d_uv1.F track_advec_switches.h compute_vert_rhs_uv_terms.h compute_horiz_rhs_uv_terms.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o eos_vars.o mpi_exchanges.o scalars.o ocean_vars.o mixing.o grid.o coupling.o surf_flux.o diagnostics.o private_scratch.o hidden_mpi_vars.o param.o 
++step3d_t_ISO.o : step3d_t_ISO.F track_advec_switches.h compute_vert_tracer_fluxes.h compute_horiz_tracer_fluxes.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o bulk_frc.o upscale_output.o scalars.o ocean_vars.o mixing.o mpi_exchanges.o grid.o marbl_driver.o tracers.o surf_flux.o river_frc.o cdr_frc.o pipe_frc.o private_scratch.o hidden_mpi_vars.o param.o 
++step2d_FB.o : step2d_FB.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt surf_flux.o mpi_exchanges.o scalars.o ocean_vars.o grid.o coupling.o cdr_frc.o pipe_frc.o river_frc.o private_scratch.o hidden_mpi_vars.o param.o 
++sponge_tune.o : sponge_tune.F sponge_tune.opt set_global_definitions.h cppdefs.opt grid.o error_handling_mod.o param.o hidden_mpi_vars.o roms_read_write.o calc_pflx_mod.o dimensions.o scalars.o nc_read_write.o 
++set_weights.o : set_weights.F set_global_definitions.h cppdefs.opt scalars.o param.o coupling.o 
++setup_grid2.o : setup_grid2.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt grid.o scalars.o comm_vars.o private_scratch.o hidden_mpi_vars.o param.o 
++setup_grid1.o : setup_grid1.F compute_auxiliary_bounds.h compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt mpi_exchanges.o scalars.o grid.o hidden_mpi_vars.o param.o 
++set_scoord.o : set_scoord.F set_global_definitions.h cppdefs.opt comm_vars.o param.o scalars.o scoord.o 
++set_nudgcof.o : set_nudgcof.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o mixing.o private_scratch.o hidden_mpi_vars.o param.o 
++set_forces.o : set_forces.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt bulk_frc.o scalars.o boundary.o hidden_mpi_vars.o bgc_io.o cdr_frc.o pipe_frc.o river_frc.o tracers.o surf_flux.o flux_frc.o param.o 
++set_depth.o : set_depth.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o dimensions.o private_scratch.o scoord.o scalars.o ocean_vars.o mpi_exchanges.o grid.o coupling.o hidden_mpi_vars.o param.o 
++scoord.o : scoord.F set_global_definitions.h cppdefs.opt param.o 
++scalars.o : scalars.F set_global_definitions.h cppdefs.opt param.o 
++roms_read_write.o : roms_read_write.F set_global_definitions.h cppdefs.opt strings.o scoord.o error_handling_mod.o mpi_exchanges.o hidden_mpi_vars.o param.o dimensions.o nc_read_write.o scalars.o 
++river_frc.o : river_frc.F ana_frc_river.h river_frc.opt set_global_definitions.h cppdefs.opt error_handling_mod.o param.o dimensions.o grid.o scalars.o nc_read_write.o roms_read_write.o 
++rho_eos.o : rho_eos.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o tracers.o private_scratch.o hidden_mpi_vars.o param.o 
++read_inp_mod.o : read_inp_mod.F set_global_definitions.h cppdefs.opt scoord.o marbl_driver.o scalars.o error_handling_mod.o keyword_registry.o roms_read_write.o param.o 
++random_output.o : random_output.F random_output.opt set_global_definitions.h cppdefs.opt error_handling_mod.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o param.o 
++prsgrd.o : prsgrd.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt calc_pflx_mod.o scalars.o dimensions.o eos_vars.o ocean_vars.o tides.o grid.o private_scratch.o hidden_mpi_vars.o param.o 
++private_scratch.o : private_scratch.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++pre_step3d4S.o : pre_step3d4S.F track_advec_switches.h compute_vert_rhs_uv_terms.h compute_vert_tracer_fluxes.h compute_rd_bott_drag.h compute_horiz_rhs_uv_terms.h compute_horiz_tracer_fluxes.h compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o scalars.o ocean_vars.o mixing.o grid.o mpi_exchanges.o coupling.o tracers.o surf_flux.o river_frc.o private_scratch.o hidden_mpi_vars.o param.o 
++precheck.o : precheck.F extract_data.opt ocean_vars.opt set_global_definitions.h cppdefs.opt error_handling_mod.o 
++pipe_frc.o : pipe_frc.F ana_pipe_frc.h pipe_frc.opt set_global_definitions.h cppdefs.opt error_handling_mod.o param.o nc_read_write.o roms_read_write.o dimensions.o 
++particles.o : particles.F particles.opt set_global_definitions.h cppdefs.opt error_handling_mod.o nc_read_write.o roms_read_write.o dimensions.o grid.o param.o hidden_mpi_vars.o scalars.o ocean_vars.o 
++param.o : param.F param.opt set_global_definitions.h cppdefs.opt 
++omega.o : omega.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt surf_flux.o scalars.o ocean_vars.o mpi_exchanges.o cdr_frc.o pipe_frc.o grid.o dimensions.o private_scratch.o hidden_mpi_vars.o param.o 
++ocean_vars.o : ocean_vars.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++nc_read_write.o : nc_read_write.F nc_read_write.opt set_global_definitions.h cppdefs.opt error_handling_mod.o fp_utils.o 
++mpi_test_arr.o : mpi_test_arr.F set_global_definitions.h cppdefs.opt param.o 
++mpi_setup.o : mpi_setup.F set_global_definitions.h cppdefs.opt error_handling_mod.o roms_read_write.o hidden_mpi_vars.o param.o 
++mpi_exchanges.o : mpi_exchanges.F hidden_mpi_vars.o dimensions.o param.o 
++mixing.o : mixing.F set_global_definitions.h cppdefs.opt tracers.o scalars.o param.o 
++mess_buffers.o : mess_buffers.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++marbl_driver.o : marbl_driver.F set_global_definitions.h cppdefs.opt roms_read_write.o mpi_exchanges.o nc_read_write.o error_handling_mod.o ocean_vars.o grid.o scalars.o bgc_forces.o surf_flux.o dimensions.o param.o 
++main.o : main.F set_global_definitions.h cppdefs.opt tides.o boundary.o zslice_output.o surf_flux.o extract_data.o calc_pflx_mod.o precheck.o roms_read_write.o grid.o bec2_params.o bgc_io.o analytical.o frc_output.o cdr_output.o random_output.o particles.o sponge_tune.o upscale_output.o error_handling_mod.o scalars.o basic_output.o fp_utils.o timers.o tracers.o param.o 
++lmd_vmix.o : lmd_vmix.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o tracers.o private_scratch.o hidden_mpi_vars.o param.o 
++lmd_swr_frac.o : lmd_swr_frac.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt mpi_exchanges.o mixing.o ocean_vars.o scalars.o private_scratch.o hidden_mpi_vars.o param.o 
++lmd_kpp.o : lmd_kpp.F lmd_wscale_wm_and_ws.h lmd_kpp_smooth_hbl.h lmd_wscale_ws_only.h set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o scalars.o ocean_vars.o mixing.o param.o mpi_exchanges.o grid.o surf_flux.o 
++lenstr.o : lenstr.F 
++keyword_registry.o : keyword_registry.F error_handling_mod.o param.o 
++insert_node.o : insert_node.F insert_node.F error_handling_mod.o 
++init_scalars.o : init_scalars.F set_global_definitions.h cppdefs.opt read_inp_mod.o dimensions.o roms_read_write.o scalars.o comm_vars.o 
++init_arrays.o : init_arrays.F compute_extended_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt bulk_frc.o bgc_io.o bgc_forces.o bgc_shared_vars.o pipe_frc.o flux_frc.o mess_buffers.o buffer.o boundary.o work_mod.o basic_output.o ocean_vars.o mixing.o grid.o eos_vars.o coupling.o tracers.o surf_flux.o private_scratch.o hidden_mpi_vars.o param.o 
++hidden_mpi_vars.o : hidden_mpi_vars.F set_global_definitions.h cppdefs.opt param.o 
++grid_stiffness.o : grid_stiffness.F compute_auxiliary_bounds.h compute_tile_bounds.h set_global_definitions.h cppdefs.opt ocean_vars.o grid.o comm_vars.o hidden_mpi_vars.o param.o 
++grid.o : grid.F ana_grid.h set_global_definitions.h cppdefs.opt error_handling_mod.o mpi_exchanges.o scalars.o roms_read_write.o dimensions.o nc_read_write.o param.o 
++get_init.o : get_init.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt sponge_tune.o calc_pflx_mod.o error_handling_mod.o mpi_exchanges.o param.o dimensions.o grid.o roms_read_write.o nc_read_write.o basic_output.o ocean_vars.o mixing.o coupling.o marbl_driver.o tracers.o hidden_mpi_vars.o scalars.o 
++frc_output.o : frc_output.F compute_tile_bounds.h frc_output.opt set_global_definitions.h cppdefs.opt hidden_mpi_vars.o surf_flux.o bulk_frc.o marbl_driver.o scalars.o roms_read_write.o nc_read_write.o dimensions.o param.o 
++flux_frc.o : flux_frc.F flux_frc.opt set_global_definitions.h cppdefs.opt error_handling_mod.o grid.o param.o dimensions.o roms_read_write.o scalars.o surf_flux.o tracers.o 
++extract_data.o : extract_data.F extract_data.opt set_global_definitions.h cppdefs.opt mpi_exchanges.o error_handling_mod.o vertical_remapping.o basic_output.o calc_pflx_mod.o scoord.o param.o scalars.o ocean_vars.o tracers.o roms_read_write.o nc_read_write.o dimensions.o grid.o 
++ext_copy_prv2shr.o : ext_copy_prv2shr.F compute_extended_bounds.h set_global_definitions.h cppdefs.opt param.o 
++eos_vars.o : eos_vars.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++dimensions.o : dimensions.F set_global_definitions.h cppdefs.opt hidden_mpi_vars.o param.o 
++diag_vars.o : diag_vars.F set_global_definitions.h cppdefs.opt 
++diagnostics.o : diagnostics.F diagnostics.opt set_global_definitions.h cppdefs.opt mpi_exchanges.o grid.o param.o dimensions.o roms_read_write.o nc_read_write.o hidden_mpi_vars.o scalars.o ocean_vars.o tracers.o 
++diag.o : diag.F diag.opt compute_tile_bounds.h set_global_definitions.h cppdefs.opt error_handling_mod.o timers.o ocean_vars.o grid.o eos_vars.o diag_vars.o comm_vars.o scalars.o private_scratch.o hidden_mpi_vars.o param.o 
++coupling.o : coupling.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++comm_vars.o : comm_vars.F set_global_definitions.h cppdefs.opt param.o 
++check_switches2.o : check_switches2.F compute_tile_bounds.h set_global_definitions.h cppdefs.opt strings.o hidden_mpi_vars.o param.o error_handling_mod.o 
++check_switches1.o : check_switches1.F set_global_definitions.h cppdefs.opt error_handling_mod.o strings.o scalars.o param.o 
++checkdims.o : checkdims.F set_global_definitions.h cppdefs.opt scoord.o error_handling_mod.o roms_read_write.o param.o 
++cdr_output.o : cdr_output.F cdr_output.opt set_global_definitions.h cppdefs.opt cdr_frc.o error_handling_mod.o ocean_vars.o scalars.o nc_read_write.o roms_read_write.o dimensions.o bgc_shared_vars.o marbl_driver.o param.o tracers.o 
++cdr_frc.o : cdr_frc.F cdr_frc.opt set_global_definitions.h cppdefs.opt error_handling_mod.o vertical_remapping.o marbl_driver.o nc_read_write.o param.o ocean_vars.o dimensions.o grid.o scalars.o roms_read_write.o 
++calc_pflx_mod.o : calc_pflx_mod.F calc_pflx.opt set_global_definitions.h cppdefs.opt mpi_exchanges.o diagnostics.o nc_read_write.o ocean_vars.o grid.o param.o scalars.o dimensions.o 
++bulk_frc.o : bulk_frc.F compute_extended_bounds.h bulk_frc.opt set_global_definitions.h cppdefs.opt scalars.o ocean_vars.o mixing.o grid.o tracers.o surf_flux.o error_handling_mod.o roms_read_write.o param.o 
++buffer.o : buffer.F set_global_definitions.h cppdefs.opt scalars.o param.o 
++boundary.o : boundary.F set_global_definitions.h cppdefs.opt tracers.o error_handling_mod.o hidden_mpi_vars.o dimensions.o roms_read_write.o param.o 
++bgc_shared_vars.o : bgc_shared_vars.F bgc_3Ddiagnostics.opt bgc_2Ddiagnostics.opt bgc.opt set_global_definitions.h cppdefs.opt marbl_driver.o bec2_vars.o tracers.o roms_read_write.o param.o 
++bgc_io.o : bgc_io.F compute_tile_bounds.h compute_extended_bounds.h set_global_definitions.h cppdefs.opt hidden_mpi_vars.o bgc_forces.o error_handling_mod.o dimensions.o scalars.o roms_read_write.o nc_read_write.o bgc_shared_vars.o marbl_driver.o tracers.o param.o 
++bgc_forces.o : bgc_forces.F set_global_definitions.h cppdefs.opt param.o 
++bec2_vars.o : bec2_vars.F set_global_definitions.h cppdefs.opt 
++bec2_params.o : bec2_params.F set_global_definitions.h cppdefs.opt 
++bec2_driver.o : bec2_driver.F set_global_definitions.h cppdefs.opt tracers.o bec2_vars.o bec2_params.o bgc_shared_vars.o scalars.o ocean_vars.o grid.o 
++basic_output.o : basic_output.F ocean_vars.opt set_global_definitions.h cppdefs.opt private_scratch.o marbl_driver.o coupling.o tracers.o dimensions.o grid.o work_mod.o eos_vars.o mixing.o error_handling_mod.o param.o ocean_vars.o scalars.o calc_pflx_mod.o sponge_tune.o roms_read_write.o nc_read_write.o 
++analytical.o : analytical.F compute_extended_bounds.h ana_vmix.h ana_init.h set_global_definitions.h cppdefs.opt surf_flux.o boundary.o param.o scalars.o mixing.o tracers.o dimensions.o mpi_exchanges.o grid.o ocean_vars.o 
++alfabeta.o : alfabeta.F set_global_definitions.h cppdefs.opt param.o scalars.o tracers.o 
++add_git_hash.o : add_git_hash.F error_handling_mod.o roms_read_write.o 
++utils_mod.o : utils_mod.F90 
++fp_utils.o : fp_utils.F90 
++error_handling_mod.o : error_handling_mod.F90 set_global_definitions.h cppdefs.opt utils_mod.o param.o timers.o 
+diff --git a/src/Makedefs.inc b/src/Makedefs.inc
+index beadc66d..efb939e0 100644
+--- a/src/Makedefs.inc
++++ b/src/Makedefs.inc
+@@ -98,6 +98,15 @@ else
+    LDR := $(MPI_WRAPPER)
+ endif
+ 
++# C compiler for small C helpers (e.g. clear_fp.c)
++ifeq ($(COMPILER),$(filter gnu intel ifort, $(COMPILER)))
++   CC := $(shell $(MPI_WRAPPER) -show 2>/dev/null | awk '{print $$1}' | sed 's/ifx$$/icx/; s/ifort$$/icc/; s/gfortran$$/gcc/')
++endif
++ifeq ($(strip $(CC)),)
++   CC := mpicc
++endif
++CFLAGS ?=
++
+ # For BUILD_MODE = "debug", always keep source code
+ ifeq ($(BUILD_MODE),debug)
+    KEEP_PPSRC=true
+@@ -184,12 +193,14 @@ LDR += $(LDFLAGS)
+ ifeq ($(COMPILER),ifort)
+     FFLAGS = -O3 -ip  # Apply -ip only for ifort
+ else ifeq ($(COMPILER),intel)
+-    FFLAGS = -O3      # Do NOT use -ip for ifx
++    FFLAGS = -O3 -init=snan    # Do NOT use -ip for ifx
+ endif
+ 
+ # Apply debug, strict, vtune, or gprof settings for Intel compilers
+ ifeq ($(COMPILER),$(filter ifort intel, $(COMPILER)))
+-    ifeq ($(BUILD_MODE),debug)
++    ifeq ($(BUILD_MODE),snan)
++        FFLAGS = -O3 -init=snan -fpe0 -traceback
++    else ifeq ($(BUILD_MODE),debug)
+         FFLAGS = -g -traceback -check all
+     else ifeq ($(BUILD_MODE),test)
+ 	FFLAGS = -O0
+@@ -236,7 +247,10 @@ FFLAGS+=$(USER_FFLAGS)
+ # Compilation rules for file types:
+ #   (used for every file until the final linking step)
+ 
+-.SUFFIXES: $(OBJ_ext) $(PPF77_ext) $(UPF77_ext) $(UPF90_ext) $(PPF90_ext)
++.SUFFIXES: .c $(OBJ_ext) $(PPF77_ext) $(UPF77_ext) $(UPF90_ext) $(PPF90_ext)
++
++.c$(OBJ_ext):
++	$(CC) -c $(CFLAGS) -o $@ $<
+ 
+ #Unprocessed F90 -> object file (typically .F90->.o)
+ $(UPF90_ext)$(OBJ_ext):
+diff --git a/src/Makefile b/src/Makefile
+index f23e8ea5..3018dffe 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -8,6 +8,7 @@ include Makedefs.inc
+ # Build ROMS source list from unprocessed Fortran files
+    SRCS_F77 = $(wildcard *$(UPF77_ext))
+    SRCS_F90 = $(wildcard *$(UPF90_ext))
++   SRCS_C   = clear_fp.c
+    SRCS = $(SRCS_F77) $(SRCS_F90)
+ # Exclude files that are not part of main build (just f77 for now)
+    EXCL = mpi_test srcscheck
+@@ -28,7 +29,8 @@ include Makedefs.inc
+ 
+    OBJS_F77 = $(RCS_F77:$(PPF77_ext)=$(OBJ_ext))
+    OBJS_F90 = $(RCS_F90:$(PPF90_ext)=$(OBJ_ext))
+-   OBJS = $(OBJS_F77) $(OBJS_F90)
++   OBJS_C   = $(SRCS_C:.c=$(OBJ_ext))
++   OBJS = $(OBJS_F77) $(OBJS_F90) $(OBJS_C)
+ # Sort OBJS to remove duplicates
+   OBJS := $(sort $(OBJS))
+   $(info DEBUG: OBJS = $(OBJS))
+diff --git a/src/basic_output.F b/src/basic_output.F
+index 9be4de0e..6fbe046f 100644
+--- a/src/basic_output.F
++++ b/src/basic_output.F
+@@ -8,7 +8,7 @@
+      &     nf90_double, nf90_int, nf90_global, nf90_write,
+      &     nf90_inq_varid, nf90_put_var, nf90_put_att, nf90_open, nf90_close,
+      &     nf90_nofill, nf90_set_fill
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use roms_read_write, only:
+      &     max_name_size, dn_tm, dn_xr, dn_xu,
+      &     dn_yr, dn_yv, dn_zr, eta_rho, eta_v, xi_rho, xi_u, dn_zw,
+@@ -340,7 +340,7 @@
+         endif
+         rec_his = rec_his + 1
+ 
+-        ierr=nf90_open(fname_his,nf90_write,ncid)
++        ierr=nf90_open_clear(fname_his,nf90_write,ncid)
+         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+         call ncwrite(ncid,'ocean_time',(/time/),(/rec_his/))
+@@ -460,7 +460,7 @@
+           endif
+         rec_avg = rec_avg + 1
+ 
+-        ierr=nf90_open(fname_avg,nf90_write,ncid)
++        ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
+         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+         call ncwrite(ncid,'ocean_time',(/t_avg_ovars/),(/rec_avg/))
+@@ -606,7 +606,7 @@
+         total_rec_rst = total_rec_rst +1
+         rec_rst = rec_rst + 1
+ 
+-        ierr=nf90_open(fname_rst,nf90_write,ncid)
++        ierr=nf90_open_clear(fname_rst,nf90_write,ncid)
+         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+         call ncwrite(ncid,'ocean_time',(/time/),(/rec_rst/))
+@@ -697,7 +697,7 @@
+         call create_file('_his',fname)
+       endif
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       if (avg) then
+         call def_vars_ocean_vars(  .true.  )
+@@ -723,7 +723,7 @@
+ 
+       call create_file('_rst',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       ierr=nf90_put_att(ncid,nf90_global,'type','ROMS restart file')
+ 
+diff --git a/src/bgc_io.F b/src/bgc_io.F
+index 92cd6ca0..dadd66ff 100644
+--- a/src/bgc_io.F
++++ b/src/bgc_io.F
+@@ -48,7 +48,7 @@
+      &     wrt_bgc_diag_2d, idx_bgc_diag_2d, vname_bgc_diag_2d,
+      &     wrt_bgc_diag_3d, idx_bgc_diag_3d, vname_bgc_diag_3d
+ #endif
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use roms_read_write, only: max_name_size
+       use roms_read_write, only:
+      &     dn_tm, dn_xr, dn_yr, dn_zr, eta_rho,
+@@ -248,7 +248,7 @@
+           record_avg = record_avg + 1
+           output_time_avg = 0
+           navg_bgc = 0
+-          ierr=nf90_open(fname_avg,nf90_write,ncid)
++          ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
+           call ncwrite(ncid,'ocean_time',(/time/),(/record_avg/))
+           do itrc=iTandS+nt_passive+1, nt
+              if (wrt_t_avg(itrc)) then
+@@ -289,7 +289,7 @@
+           endif
+           record_his = record_his + 1
+           output_time_his=0
+-          ierr=nf90_open(fname_his,nf90_write,ncid)
++          ierr=nf90_open_clear(fname_his,nf90_write,ncid)
+           call ncwrite(ncid,'ocean_time',(/time/),(/record_his/))
+           do itrc=iTandS+nt_passive+1, nt
+             if (wrt_t(itrc)) then
+@@ -364,7 +364,7 @@
+           record_dia_avg = record_dia_avg + 1
+           output_time_dia_avg = 0
+           navg_dia_bgc = 0
+-          ierr=nf90_open(fname_avg,nf90_write,ncid)
++          ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
+           call ncwrite(ncid,'ocean_time',(/time/),(/record_dia_avg/))
+           do itrc=1,nr_bgc_diag_2d
+             if (wrt_bgc_diag_2d(itrc)) then
+@@ -404,7 +404,7 @@
+           endif
+           record_dia_his = record_dia_his + 1
+           output_time_dia_his = 0
+-          ierr=nf90_open(fname_his,nf90_write,ncid)
++          ierr=nf90_open_clear(fname_his,nf90_write,ncid)
+           call ncwrite(ncid,'ocean_time',(/time/),(/record_dia_his/))
+           do itrc=1,nr_bgc_diag_2d
+             if (wrt_bgc_diag_2d(itrc)) then
+@@ -451,7 +451,7 @@
+         call create_file('_bgc',fname)
+       endif
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       call def_vars_bgc( ncid,avg )
+ 
+@@ -476,7 +476,7 @@
+         call create_file('_bgc_dia',fname)
+       endif
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       call def_bgc_diag(ncid,avg)
+ 
+diff --git a/src/cdr_frc.F b/src/cdr_frc.F
+index 5d59d302..8ac69d7b 100644
+--- a/src/cdr_frc.F
++++ b/src/cdr_frc.F
+@@ -18,7 +18,7 @@
+       use dimensions, only: nx, ny, nz
+       use ocean_vars, only: hz, z_r0, hz0
+       use param, only: mynode, lm, mm, ocean_grid_comm
+-      use nc_read_write, only: ncread
++      use nc_read_write, only: nf90_open_clear, ncread
+       use marbl_driver, only: iALK, iDIC
+       use vertical_remapping, only: remap_src_to_grid
+       use error_handling_mod, only: error_log
+@@ -160,7 +160,7 @@
+       else
+ 
+         ! Open file
+-        ierr=nf90_open(cdr_file, nf90_nowrite, ncid)
++        ierr=nf90_open_clear(cdr_file, nf90_nowrite, ncid)
+         call error_log%check_netcdf_status(
+      &       netcdf_status=ierr,
+      &       info="Cannot open CDR forcing file",
+diff --git a/src/cdr_output.F b/src/cdr_output.F
+index 389a0cfd..f981ff3e 100644
+--- a/src/cdr_output.F
++++ b/src/cdr_output.F
+@@ -18,7 +18,7 @@
+       use roms_read_write, only:
+      &     dn_tm, dn_xr, dn_yr, dn_zr, eta_rho,
+      &     xi_rho, create_file, sec2date
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use netcdf, only:
+      &     nf90_noerr, nf90_write, nf90_double, nf90_open,
+      &     nf90_put_att, nf90_close
+@@ -547,7 +547,7 @@
+ 
+       if (record==nrpf) then
+           call create_file('_cdr',fname)
+-          ierr=nf90_open(fname,nf90_write,ncid)
++          ierr=nf90_open_clear(fname,nf90_write,ncid)
+           call create_cdr_output_variables(ncid)
+           ierr = nf90_close(ncid)
+           record = 0
+@@ -555,7 +555,7 @@
+ 
+         record = record+1
+ 
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+         call error_log%check_netcdf_status(netcdf_status=ierr,
+      &       info="error opening "//fname,
+      &       context=module_name//"/"//sr_name)
+diff --git a/src/diagnostics.F b/src/diagnostics.F
+index a2080b3a..0026aa95 100644
+--- a/src/diagnostics.F
++++ b/src/diagnostics.F
+@@ -17,7 +17,7 @@
+       use hidden_mpi_vars, only:
+      &     east_msg_exch, north_msg_exch,
+      &     south_msg_exch, west_msg_exch
+-      use nc_read_write, only: ncwrite, ncread
++      use nc_read_write, only: nf90_open_clear, ncwrite, ncread
+       use roms_read_write, only:
+      &     diag_avg_output, diagnostic_opt, bfx,
+      &     bfy, dn_xu, dn_yv, dn_zr, eta_v, xi_u,
+@@ -763,7 +763,7 @@
+         endif
+         record = record + 1
+ 
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+         call ncwrite(ncid,'ocean_time',(/time/),(/record/))
+@@ -793,7 +793,7 @@
+       subroutine create_diagvars(ncid)  ![
+       ! Add diagnostics variables to an opened netcdf file
+ 
+-      use nc_read_write, only: nccreate
++      use nc_read_write, only: nf90_open_clear, nccreate
+       implicit none
+ 
+       !import/export
+@@ -1001,7 +1001,7 @@
+ 
+       call create_file('_dia',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       ! Diagnostics options
+       ierr=nf90_put_att (ncid, nf90_global, 'diagnostic_options', adjustl(diagnostic_opt))
+diff --git a/src/extract_data.F b/src/extract_data.F
+index f6ad7844..a174b496 100644
+--- a/src/extract_data.F
++++ b/src/extract_data.F
+@@ -42,7 +42,7 @@
+ 
+       use grid, only: angler, rmask, umask, vmask
+       use dimensions, only: nx, ny, nz
+-      use nc_read_write, only: nccreate, ncread, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncread, ncwrite
+       use roms_read_write, only: findstr, create_file
+       use netcdf, only:
+      &     nf90_double, nf90_write, nf90_nowrite,
+@@ -302,7 +302,7 @@
+      &    'extract_data :: read objects: ',extract_file
+       endif
+ 
+-      ierr = nf90_open(extract_file,nf90_nowrite,ncid)
++      ierr = nf90_open_clear(extract_file,nf90_nowrite,ncid)
+       call error_log%check_netcdf_status(netcdf_status=ierr,
+      &     info="error reading objects file "//extract_file,
+      &     context=module_name//"/"//sr_name)
+@@ -604,7 +604,7 @@
+ # endif
+       endif
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ !     ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+       !! We have to update the object records regardless of whether
+@@ -849,7 +849,7 @@
+ 
+       call create_file('_ext',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       call create_edata_vars(ncid)
+       call error_log%abort_check()
+diff --git a/src/frc_output.F b/src/frc_output.F
+index 1f6ca123..3f835b81 100644
+--- a/src/frc_output.F
++++ b/src/frc_output.F
+@@ -7,7 +7,7 @@
+       use param, only: ieast, iwest, jnorth, jsouth, nsub_e, nsub_x,
+      &     lm, mm, isalt, itemp, mynode
+       use dimensions, only: i0, i1, j0, j1
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use roms_read_write, only:
+      &     dn_tm, dn_xr, dn_xu, dn_yr, dn_yv,
+      &     eta_rho, eta_v, xi_rho, xi_u, dn_zr, create_file
+@@ -198,7 +198,7 @@
+       output_time = output_time + dt
+ 
+       if (output_time>=output_period) then
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+       record = record+1
+       call ncwrite(ncid,'ocean_time',(/time/),(/record/))
+ 
+@@ -297,7 +297,7 @@
+ 
+       call create_file('_frc',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       ! Make sure all necessary dimensions are in all files
+       ierr=nccreate(ncid,'',(/dn_xr,dn_yr,dn_zr,dn_tm/),(/xi_rho,eta_rho,N,0/))
+diff --git a/src/get_init.F b/src/get_init.F
+index fbfbb22c..798be688 100644
+--- a/src/get_init.F
++++ b/src/get_init.F
+@@ -35,7 +35,7 @@
+      &     nf90_inquire_dimension, nf90_noerr, nf90_nowrite,
+      &     nf90_strerror, nf90_inq_varid, nf90_get_var, nf90_close,
+      &     nf90_open
+-      use nc_read_write, only: ncread
++      use nc_read_write, only: nf90_open_clear, ncread
+       use roms_read_write, only: ininame
+       use grid, only:
+      &     riv_umask, riv_vmask, rmask, umask, vmask
+@@ -94,7 +94,7 @@ c--#define VERBOSE
+ !             (2b) nrrec < 0, THE LAST available record is used.
+ 
+       init_type=0
+-      ierr=nf90_open(ininame, nf90_nowrite, ncid)
++      ierr=nf90_open_clear(ininame, nf90_nowrite, ncid)
+       write(error_info, *)
+      &     'Cannot open netCDF file ''', trim(ininame), '''.'
+       call error_log%check_netcdf_status(
+diff --git a/src/grid.F b/src/grid.F
+index ff4105db..236c1967 100644
+--- a/src/grid.F
++++ b/src/grid.F
+@@ -16,7 +16,7 @@
+      &     nf90_noerr, nf90_nowrite, nf90_write,
+      &     nf90_open, nf90_strerror, nf90_inq_varid, nf90_get_var,
+      &     nf90_close
+-      use nc_read_write, only: ncread
++      use nc_read_write, only: nf90_open_clear, ncread
+       use dimensions, only: i0, i1, j0, j1, gnx, gny, nx, ny, nz
+       use roms_read_write, only:
+      &     grdname, dn_xr, dn_yr, eta_rho,
+@@ -199,7 +199,7 @@
+ 
+       call create_file('_grd',ana_grdname,.true.) ! last argument is to skip date label
+ 
+-      ierr=nf90_open(ana_grdname,nf90_write,ncid)
++      ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
+       call def_grid(ncid)
+       call wrt_grid(ncid)
+       ierr=nf90_close(ncid)
+@@ -214,7 +214,7 @@
+ ! Arguments: ncid    NetCDF unit-ID of NetCDF file, which must be
+ !                            already opened and in definition mode;
+ 
+-      use nc_read_write, only: nccreate
++      use nc_read_write, only: nf90_open_clear, nccreate
+       use netcdf, only:
+      &     nf90_char, nf90_double, nf90_def_var,
+      &     nf90_put_att
+@@ -324,7 +324,7 @@
+       !                            already opened and in definition mode
+ 
+       use netcdf, only: nf90_put_var
+-      use nc_read_write, only: ncwrite
++      use nc_read_write, only: nf90_open_clear, ncwrite
+       use error_handling_mod, only: error_log ! do not abort here, mynode==0
+ 
+       implicit none
+@@ -448,7 +448,7 @@
+ ! Open grid netCDF file for reading. Check that dimensions in the file
+ ! are consistent with the model, then read all necessary variables.
+ 
+-      ierr=nf90_open(grdname, nf90_nowrite, ncid)
++      ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
+       if (ierr == nf90_noerr) then
+         ierr=checkdims (ncid, grdname, varid)
+         if (ierr. ne. nf90_noerr) then
+diff --git a/src/main.F b/src/main.F
+index 1e26e095..4372b482 100644
+--- a/src/main.F
++++ b/src/main.F
+@@ -10,6 +10,7 @@
+       use tracers, only: init_tracers
+       use mpi_f08, only: mpi_wtime
+       use timers, only: tstart, tend
++      use fp_utils, only: clear_fp_exceptions
+ 
+       implicit none                                        ! with single parallel region using
+       integer :: ierr                                      ! explicit barrier synchronization.
+@@ -25,6 +26,8 @@ C$ !!   write(*,*) 'MPI thread support levels =', req_lev,level
+ C$    ierr=0
+       call MPI_Init(ierr)
+ 
++      call clear_fp_exceptions()
++
+       call mpi_setup
+       tstart=MPI_Wtime()
+ 
+@@ -170,9 +173,9 @@ C$OMP BARRIER
+ C$OMP BARRIER
+ 
+ #ifdef SOLVE3D
+-C$OMP MASTER                           ! Setup vertical stretching
+-      call set_scoord                  ! functions for S-coordinate
+-C$OMP END MASTER                       ! system
++C$OMP MASTER
++      call compute_scoord_curves
++C$OMP END MASTER
+ C$OMP BARRIER
+ #endif
+ 
+@@ -210,6 +213,13 @@ CR      write(*,*) '-10' MYID
+ C$OMP BARRIER
+ CR      write(*,*) '-9' MYID
+ 
++#ifdef SOLVE3D
++C$OMP MASTER
++      call print_scoord_diagnostics
++C$OMP END MASTER
++C$OMP BARRIER
++#endif
++
+ CR      write(*,*) ' -8' MYID
+ 
+ #ifdef SOLVE3D
+diff --git a/src/nc_read_write.F b/src/nc_read_write.F
+index 4e6d8773..5e8c2ec5 100644
+--- a/src/nc_read_write.F
++++ b/src/nc_read_write.F
+@@ -5,7 +5,8 @@
+       use netcdf, only:
+      &     nf90_float, nf90_noerr, nf90_strerror,
+      &     nf90_inq_dimid, nf90_def_dim, nf90_def_var, nf90_inq_varid,
+-     &     nf90_put_var, nf90_get_var
++     &     nf90_put_var, nf90_get_var, nf90_open, nf90_create
++      use fp_utils, only: clear_fp_exceptions, restore_fp_exceptions
+       use error_handling_mod, only: error_log
+       implicit none
+       private
+@@ -25,9 +26,32 @@
+       public :: ncread
+       public :: ncwrite
+       public :: nccreate
++      public :: nf90_open_clear, nf90_create_clear
+ 
+       contains
+ 
++!----------------------------------------------------------------------
++      integer function nf90_open_clear(path, mode, ncid)
++      character(len=*), intent(in) :: path
++      integer, intent(in) :: mode
++      integer, intent(out) :: ncid
++
++      call clear_fp_exceptions()
++      nf90_open_clear = nf90_open(path, mode, ncid)
++      call restore_fp_exceptions()
++      end function nf90_open_clear
++
++!----------------------------------------------------------------------
++      integer function nf90_create_clear(path, cmode, ncid)
++      character(len=*), intent(in) :: path
++      integer, intent(in) :: cmode
++      integer, intent(out) :: ncid
++
++      call clear_fp_exceptions()
++      nf90_create_clear = nf90_create(path, cmode, ncid)
++      call restore_fp_exceptions()
++      end function nf90_create_clear
++
+ !----------------------------------------------------------------------
+       subroutine ncread_1D(ncid,vname,dat,start)  ![
+       implicit none
+diff --git a/src/particles.F b/src/particles.F
+index 83164064..176043c0 100644
+--- a/src/particles.F
++++ b/src/particles.F
+@@ -22,7 +22,7 @@
+       use roms_read_write, only:
+      &     dn_tm, create_file, store_string_att,
+      &     particle_opt
+-      use nc_read_write, only: nccreate
++      use nc_read_write, only: nf90_open_clear, nccreate
+       use error_handling_mod, only: error_log
+       implicit none
+       private
+@@ -387,7 +387,7 @@
+       end subroutine seed_particles !]
+ !-------------------------------------------------
+       subroutine wrt_particles ![
+-      use nc_read_write, only: ncwrite
++      use nc_read_write, only: nf90_open_clear, ncwrite
+       implicit none
+ 
+       ! local
+@@ -402,7 +402,7 @@
+       endif
+       record = record + 1
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+       ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+       call ncwrite(ncid,'ocean_time',(/time/),(/record/))
+@@ -455,7 +455,7 @@
+       dimnames = (/dn_npart,dn_seven, dn_tm/)
+       dimsizes = (/ npmx,  7,      0/)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       varid = nccreate(ncid,'particles',dimnames,dimsizes,nf90_double)
+       if (ierr/=nf90_noerr) then
+diff --git a/src/pipe_frc.F b/src/pipe_frc.F
+index 291a4060..c8ad5cef 100644
+--- a/src/pipe_frc.F
++++ b/src/pipe_frc.F
+@@ -16,7 +16,7 @@
+       use roms_read_write, only:
+      &     ncforce, pipe_frc_opt, grdname,
+      &     set_frc_data, store_string_att
+-      use nc_read_write, only: ncread
++      use nc_read_write, only: nf90_open_clear, ncread
+       use param, only: n, lm, mm, nt, mynode
+       use error_handling_mod, only: error_log
+       implicit none
+@@ -107,7 +107,7 @@
+         ! pipe_flx is defined in ana_pipe_frc.h
+ 
+       else ! Look in pipe forcing file for index and fraction vars
+-         ierr = nf90_open(frcfile(nc_pvol%ifile), nf90_nowrite, ncid)
++         ierr = nf90_open_clear(frcfile(nc_pvol%ifile), nf90_nowrite, ncid)
+          ierr = nf90_inq_varid(ncid, "pipe_index", varid)
+          ierr = ierr * nf90_inq_varid(ncid, "pipe_fraction", varid)
+ 
+@@ -144,7 +144,7 @@
+             endif
+          else ! ierr  / if not in the forcing file, look for a single variable in the grid file
+         ! Read 'pipe_flux' from grid file (Pipe_idx & pipe_fraction in one value)
+-            ierr=nf90_open(grdname, nf90_nowrite, ncid)
++            ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
+         ! Temporarily store as pipe_fraction to avoid extra array,
+         ! but value still pipe_idx + pipe_fraction
+             call ncread(ncid,pipe_flx_name, pipe_fraction(i0:i1,j0:j1))
+diff --git a/src/random_output.F b/src/random_output.F
+index 23d69f29..491a09e4 100644
+--- a/src/random_output.F
++++ b/src/random_output.F
+@@ -8,7 +8,7 @@
+       use roms_read_write, only:
+      &     dn_tm, dn_xr, dn_xu, dn_yr, dn_yv,
+      &     eta_rho, eta_v, xi_rho, xi_u, create_file
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use netcdf, only:
+      &     nf90_noerr, nf90_write, nf90_open,
+      &     nf90_put_att, nf90_close
+@@ -88,7 +88,7 @@
+ 
+         if (record==nrpf) then
+           call create_file('_rnd',fname)
+-          ierr=nf90_open(fname,nf90_write,ncid)
++          ierr=nf90_open_clear(fname,nf90_write,ncid)
+           call def_vars_random(ncid)
+           ierr = nf90_close(ncid)
+           record = 0
+@@ -96,7 +96,7 @@
+ 
+         record = record+1
+ 
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+         if (ierr/=nf90_noerr) then
+            call error_log%check_netcdf_status(netcdf_status=ierr,
+      &          info="error opening "//fname,
+diff --git a/src/river_frc.F b/src/river_frc.F
+index 4afd3226..c05983d5 100644
+--- a/src/river_frc.F
++++ b/src/river_frc.F
+@@ -96,7 +96,8 @@
+       ! subroutine
+       use netcdf, only:
+      &     nf90_double, nf90_noerr, nf90_nowrite,
+-     &     nf90_write, nf90_open, nf90_put_att, nf90_close, nf90_inq_varid
++     &     nf90_write, nf90_put_att, nf90_close, nf90_inq_varid
++      use nc_read_write, only: nf90_open_clear
+       use mpi_f08, only: mpi_double_precision, mpi_max
+       implicit none
+ 
+@@ -138,18 +139,18 @@
+           enddo
+         enddo
+ 
+-        ierr=nf90_open(ana_grdname,nf90_write,ncid)
++        ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
+         varid = nccreate(ncid,'river_flux',(/dn_xr,dn_yr/),(/xi_rho,eta_rho/), nf90_double)
+         ierr=nf90_put_att(ncid, varid,'long_name','River volume flux')
+ !       ierr=nf90_close(ncid)
+ !       print *,'added river_flux',mynode
+-!       ierr=nf90_open(ana_grdname,nf90_write,ncid)
++!       ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
+         call ncwrite(ncid,'river_flux', rflx(i0:i1,j0:j1))
+         ierr=nf90_close(ncid)
+ 
+       else                      ! Not analytical, read from file
+          ! Start by checking forcing file for separate variables
+-         ierr=nf90_open(frcfile(nc_rvol%ifile), nf90_nowrite, ncid) ! open river forcing file
++         ierr=nf90_open_clear(frcfile(nc_rvol%ifile), nf90_nowrite, ncid) ! open river forcing file
+          ierr = nf90_inq_varid(ncid, "river_index", varid) ! check river forcing file for index...
+          ierr = ierr * nf90_inq_varid(ncid, "river_fraction", varid) ! ... and fraction variables
+ 
+@@ -186,7 +187,7 @@
+             endif
+          else ! if not in the forcing file, look for a single variable in the grid file
+             ierr=nf90_close(ncid)
+-            ierr=nf90_open(grdname, nf90_nowrite, ncid)
++            ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
+             ierr = nf90_inq_varid(ncid, riv_flx_name, varid) ! check grid file for variable
+ 
+             if (ierr /= nf90_noerr) then ! if not in grid file
+diff --git a/src/roms_read_write.F b/src/roms_read_write.F
+index 5327d092..a0b5f858 100644
+--- a/src/roms_read_write.F
++++ b/src/roms_read_write.F
+@@ -12,7 +12,8 @@
+      &     nf90_put_att, nf90_inquire_variable, nf90_inquire_dimension,
+      &     nf90_get_var
+       use scalars, only: time, dt, sec2day, tdays, akt_bak, akv_bak
+-      use nc_read_write, only: nccreate, ncread
++      use nc_read_write, only: nf90_open_clear, nf90_create_clear,
++     &     nccreate, ncread
+       use dimensions, only: bf, nx, ny, gnx, gny, i0, i1, j0, j1
+       use param, only: mynode, nnodes
+       use hidden_mpi_vars, only: inode, jnode
+@@ -704,7 +705,7 @@
+ 
+         found_var = .false.                                          ! reset for new file
+         if (present(ungridded_filename)) then
+-          ierr = nf90_open(ungridded_filename, nf90_nowrite, ncid)
++          ierr = nf90_open_clear(ungridded_filename, nf90_nowrite, ncid)
+           if (ierr/=nf90_noerr) then
+           call error_log%check_netcdf_status(
+      &         netcdf_status=ierr,
+@@ -712,7 +713,7 @@
+      &            info=("error opening "//ungridded_filename))
+           end if
+        else
+-          ierr = nf90_open(frcfile(ifile), nf90_nowrite, ncid)
++          ierr = nf90_open_clear(frcfile(ifile), nf90_nowrite, ncid)
+           if (ierr/=nf90_noerr) then
+           call error_log%check_netcdf_status(
+      &         netcdf_status=ierr,
+@@ -909,7 +910,7 @@
+           call find_new_record(vname,tname,modtime,ifile,irec,
+      &                         nc%times(it), nc%ungridded_forcing_file)
+ 
+-          ierr=nf90_open(nc%ungridded_forcing_file,nf90_nowrite, ncid)
++          ierr=nf90_open_clear(nc%ungridded_forcing_file,nf90_nowrite, ncid)
+           if (d1) then
+             call ncread(ncid,vname,nc%vdata(:,1,it),(/1,irec/))
+           else
+@@ -933,7 +934,7 @@
+       call find_new_record(vname,tname,modtime,ifile,irec,
+      &                         nc%times(it))
+ 
+-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
++      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
+       ! The size of vdata must match the size of the data in the
+       ! file. Ensure this in the allocation of vdata
+       ! This is in contrast with the _surf version of fill_frc_slice
+@@ -1010,7 +1011,7 @@
+         if (mynode == 0) then
+           call find_new_record(vname,tname,modtime,ifile,irec,
+      &                         nc%times(it), nc%ungridded_forcing_file)
+-          ierr=nf90_open(nc%ungridded_forcing_file,nf90_nowrite, ncid)
++          ierr=nf90_open_clear(nc%ungridded_forcing_file,nf90_nowrite, ncid)
+           call ncread(ncid,vname,nc%vdata(:,:,:,it),(/1,1,1,irec/))
+           ierr = nf90_close(ncid)
+         endif
+@@ -1029,7 +1030,7 @@
+ 
+       call find_new_record(vname,tname,modtime,ifile,irec,
+      &                         nc%times(it))
+-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
++      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
+       call ncread(ncid,vname,nc%vdata(i0:i1,j0:j1,:,it),(/1,1,1,irec/))
+       ! add force file info to output nc
+       if (mynode == 0) then
+@@ -1094,7 +1095,7 @@
+       call find_new_record(vname,tname,modtime,ifile,irec,
+      &                         nc%times(it) )
+ 
+-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
++      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
+       if (nc%coarse>0) then
+         if (.not.allocated(cdata)) then
+           call init_coarse
+@@ -1179,7 +1180,7 @@
+         call append_date_node(fname)
+       endif
+ 
+-      ierr=nf90_create(trim(fname),nf90_netcdf4,ncid)
++      ierr=nf90_create_clear(trim(fname),nf90_netcdf4,ncid)
+       if (ierr/=nf90_noerr) then
+          call error_log%check_netcdf_status(netcdf_status=ierr,
+      &        context=module_name//"/"//sr_name,
+@@ -1509,8 +1510,8 @@
+       integer           :: var_id
+       character(len=20) :: file_var_units ! variable units in forcing file
+ 
+-!     ierr = nf90_open(frcfile(ifile), nf90_nowrite, ncid)
+-      ierr = nf90_open(file_name,nf90_nowrite,ncid)
++!     ierr = nf90_open_clear(frcfile(ifile), nf90_nowrite, ncid)
++      ierr = nf90_open_clear(file_name,nf90_nowrite,ncid)
+       if (ierr/=nf90_noerr) then
+          call error_log%check_netcdf_status(netcdf_status=ierr,
+      &        context=module_name//"/"//sr_name,
+diff --git a/src/set_scoord.F b/src/set_scoord.F
+index 740641ab..51cc15fa 100644
+--- a/src/set_scoord.F
++++ b/src/set_scoord.F
+@@ -1,30 +1,44 @@
+ #include "cppdefs.opt"
+ #ifdef SOLVE3D
+-                                         ! Setup S-coordinate system:
+-      subroutine set_scoord              ! input: theta_s, theta_b, hc
++      subroutine compute_scoord_curves
++      ! Stretching curves Cs_w, Cs_r from theta_s, theta_b, hc.
+ 
+-      use param, only: mynode
+-      use comm_vars, only: hmax, hmin
+-      use scoord, only: hc, theta_b, theta_s, cs_w, cs_r
++      use scoord, only: theta_b, theta_s, cs_w, cs_r
+       use scalars, only: n
+ 
+-      implicit none                      ! output: Cs_w(0:N), Cs_r(1:N)
++      implicit none
+ 
+-      integer k                          ! Compute vertical stretching
+-      real ds,sc, z1,zhc,z2,z3, CSF      ! curves at W- and RHO-points,
++      integer :: k
++      real :: ds, sc, CSF
+ 
+-      ds=1.D0/dble(N)                    !      -1 < Cs_r,Cs_w < 0,
++      ds=1.D0/dble(N)
+       Cs_w(N)=0.D0
+-      do k=N-1,1,-1                      ! then print out z-coordinate
+-        sc=ds*dble(k-N)                  ! of S-levels for minimum,
+-        Cs_w(k)=CSF(sc, theta_s,theta_b) ! h=hc, half way, and maximum
+-      enddo                              ! depth.
++      do k=N-1,1,-1
++        sc=ds*dble(k-N)
++        Cs_w(k)=CSF(sc, theta_s,theta_b)
++      enddo
+       Cs_w(0)=-1.D0
+       do k=1,N
+         sc=ds*(dble(k-N)-0.5D0)
+         Cs_r(k)=CSF(sc, theta_s,theta_b)
+       enddo
++      end subroutine compute_scoord_curves
++
++
++      subroutine print_scoord_diagnostics
++      ! Sample z-levels; requires hmin/hmax from setup_grid2.
++
++      use param, only: mynode
++      use comm_vars, only: hmax, hmin
++      use scoord, only: hc, cs_w
++      use scalars, only: n
++
++      implicit none
++
++      integer :: k
++      real :: ds, sc, z1, zhc, z2, z3
+ 
++      ds=1.D0/dble(N)
+ 
+       mpi_master_only write(*,'(/1x,A/)')
+      &        'Vertical S-coordinate system (z at W-points):'
+@@ -34,7 +48,6 @@
+      &     'level', 'S-coord', 'Cs-curve', 'Z at hmin',
+      &     'at hc', 'half way', 'at hmax'
+ 
+-
+       do k=N,0,-1
+         sc=ds*dble(k-N)
+         z1=hmin*(hc*sc + hmin*Cs_w(k))/(hc+hmin)
+@@ -46,7 +59,13 @@
+      &'(I7,2X,ES11.4,2X,ES14.7,2X,ES16.7,2X,ES14.7,2X,ES14.7,2X,ES14.7)')
+      &       k, ds*(k-N), Cs_w(k), z1, zhc, z2, z3
+       enddo
+-      end
++      end subroutine print_scoord_diagnostics
++
++
++      subroutine set_scoord
++      call compute_scoord_curves
++      call print_scoord_diagnostics
++      end subroutine set_scoord
+ 
+ 
+       function CSF(sc, theta_s,theta_b)
+@@ -56,14 +75,14 @@
+       if (theta_s > 0.D0) then
+         csrf=(1.D0-cosh(theta_s*sc))/(cosh(theta_s)-1.D0)
+       else
+-        csrf=-sc**2                           ! Reference: This form of
+-      endif                                   ! CSF corresponds exactly
++        csrf=-sc**2
++      endif
+       if (theta_b > 0.D0) then
+         CSF=(exp(theta_b*csrf)-1.D0)/(1.D0-exp(-theta_b))
+       else
+-        CSF=csrf                              ! to Eq.(2.4) from SM2009
+-      endif                                   ! article published in
+-      end                                     ! J. Comput. Phys.
++        CSF=csrf
++      endif
++      end function CSF
+ 
+ #else
+       subroutine set_scoord_empty
+diff --git a/src/sponge_tune.F b/src/sponge_tune.F
+index d56bc48e..5ffeed22 100644
+--- a/src/sponge_tune.F
++++ b/src/sponge_tune.F
+@@ -9,7 +9,7 @@
+       use netcdf, only:
+      &     nf90_noerr, nf90_write, nf90_inq_varid,
+      &     nf90_open, nf90_put_att, nf90_close
+-      use nc_read_write, only: nccreate, ncread, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncread, ncwrite
+       use scalars, only: iic, tdays, time, dt
+       use dimensions, only: nx, ny
+       use calc_pflx_mod, only: up, vp, calc_pflx
+@@ -298,7 +298,7 @@
+       endif
+       record = record + 1
+ 
+-      ierr=nf90_open(fname, nf90_write, ncid)
++      ierr=nf90_open_clear(fname, nf90_write, ncid)
+       if (ierr/=nf90_noerr) then
+          call error_log%check_netcdf_status(netcdf_status=ierr,
+      &        info="error opening "//fname,
+@@ -346,7 +346,7 @@
+ 
+       call create_file('_spn',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       varid = nccreate(ncid,'cf_south',(/dn_xr,dn_tm/),(/xi_rho,0/))
+       ierr = nf90_put_att(ncid,varid,'long_name'
+diff --git a/src/surf_flux.F b/src/surf_flux.F
+index 9c8f0fa8..d67d0fb4 100644
+--- a/src/surf_flux.F
++++ b/src/surf_flux.F
+@@ -12,7 +12,7 @@
+       use roms_read_write, only:
+      &     ncforce, dn_tm, dn_xr, dn_xu, dn_yr
+      &     , dn_yv, eta_rho, eta_v, xi_rho, xi_u, create_file
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use netcdf, only:
+      &     nf90_global, nf90_write, nf90_nofill,
+      &     nf90_open, nf90_put_att, nf90_close, nf90_set_fill
+@@ -258,7 +258,7 @@
+         endif
+         record = record + 1
+ 
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
+ 
+         call ncwrite(ncid,'ocean_time',(/time/),(/record/))
+@@ -321,7 +321,7 @@
+         call create_file('_flx_his',fname)
+       endif
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       call create_sflx_vars(ncid)
+ 
+diff --git a/src/tides.F b/src/tides.F
+index 61ee25e5..f58579c9 100644
+--- a/src/tides.F
++++ b/src/tides.F
+@@ -263,7 +263,7 @@
+       use dimensions, only: i0, i1, j0, j1
+       use error_handling_mod, only: error_log
+       use mpi_exchanges, only: exchange_xxx
+-      use nc_read_write, only: ncread
++      use nc_read_write, only: nf90_open_clear, ncread
+       implicit none
+       character(len=10) :: sr_name = "read_tides"
+       ! local
+@@ -282,7 +282,7 @@
+       ! search for forcing file with tidal information
+       do while ((found_rec==0).and.(var_file_indx <= max_frc))
+ 
+-        ierr=nf90_open(frcfile(var_file_indx), nf90_nowrite, ncid)
++        ierr=nf90_open_clear(frcfile(var_file_indx), nf90_nowrite, ncid)
+         if(ierr/=0) then
+            call error_log%check_netcdf_status(netcdf_status=ierr,
+      &          context=module_name//"/"//sr_name,
+diff --git a/src/upscale_output.F b/src/upscale_output.F
+index c34ad44f..239f1875 100644
+--- a/src/upscale_output.F
++++ b/src/upscale_output.F
+@@ -13,7 +13,7 @@
+       use tracers, only: t_units
+       use dimensions, only: i0, i1, j0, j1
+       use grid, only: latr, lonr
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use roms_read_write, only: create_file, dn_tm, dn_xr, dn_yr, dn_zr, eta_rho, xi_rho
+       use netcdf, only:
+      &     nf90_double, nf90_write, nf90_put_att,
+@@ -397,7 +397,7 @@
+       endif
+ 
+       if (otime>=output_period_uscl) then
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+         record_uscl = record_uscl+1
+ 
+         start2D = (/1,1,record_uscl/)
+@@ -468,7 +468,7 @@
+ 
+       call create_file('_uscl',fname)
+ 
+-      ierr=nf90_open(fname,nf90_write,ncid)
++      ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+       ! Make sure all necessary dimensions are in all files
+       ierr=nccreate(ncid,'',(/dn_xr,dn_yr,dn_zr,dn_tm/),(/xi_rho,eta_rho,N,0/))
+diff --git a/src/zslice_output.F b/src/zslice_output.F
+index 5c50d8bf..34a55464 100644
+--- a/src/zslice_output.F
++++ b/src/zslice_output.F
+@@ -10,7 +10,7 @@
+       use roms_read_write, only:
+      &     bfx, bfy, dn_tm, dn_xr, dn_xu, dn_yr,
+      &     dn_yv, eta_rho, eta_v, xi_rho, xi_u, create_file
+-      use nc_read_write, only: nccreate, ncwrite
++      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
+       use netcdf, only:
+      &     nf90_noerr, nf90_write, nf90_open,
+      &     nf90_put_att, nf90_close
+@@ -352,7 +352,7 @@
+ 
+         if (record==nrpf) then
+           call create_file('_zsl',fname)
+-          ierr=nf90_open(fname,nf90_write,ncid)
++          ierr=nf90_open_clear(fname,nf90_write,ncid)
+           call def_vars_zslice(ncid)
+           call ncwrite(ncid,'depth',vecdep)
+           ierr = nf90_close(ncid)
+@@ -362,7 +362,7 @@
+         if (.not. do_avg) call calc_zslice
+         record = record+1
+ 
+-        ierr=nf90_open(fname,nf90_write,ncid)
++        ierr=nf90_open_clear(fname,nf90_write,ncid)
+ 
+         if (ierr/=nf90_noerr) then
+            call error_log%check_netcdf_status(netcdf_status=ierr,

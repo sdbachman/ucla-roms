@@ -48,7 +48,7 @@
      &     wrt_bgc_diag_2d, idx_bgc_diag_2d, vname_bgc_diag_2d,
      &     wrt_bgc_diag_3d, idx_bgc_diag_3d, vname_bgc_diag_3d
 #endif
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use roms_read_write, only: max_name_size
       use roms_read_write, only:
      &     dn_tm, dn_xr, dn_yr, dn_zr, eta_rho,
@@ -248,7 +248,7 @@
           record_avg = record_avg + 1
           output_time_avg = 0
           navg_bgc = 0
-          ierr=nf90_open(fname_avg,nf90_write,ncid)
+          ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
           call ncwrite(ncid,'ocean_time',(/time/),(/record_avg/))
           do itrc=iTandS+nt_passive+1, nt
              if (wrt_t_avg(itrc)) then
@@ -289,7 +289,7 @@
           endif
           record_his = record_his + 1
           output_time_his=0
-          ierr=nf90_open(fname_his,nf90_write,ncid)
+          ierr=nf90_open_clear(fname_his,nf90_write,ncid)
           call ncwrite(ncid,'ocean_time',(/time/),(/record_his/))
           do itrc=iTandS+nt_passive+1, nt
             if (wrt_t(itrc)) then
@@ -364,7 +364,7 @@
           record_dia_avg = record_dia_avg + 1
           output_time_dia_avg = 0
           navg_dia_bgc = 0
-          ierr=nf90_open(fname_avg,nf90_write,ncid)
+          ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
           call ncwrite(ncid,'ocean_time',(/time/),(/record_dia_avg/))
           do itrc=1,nr_bgc_diag_2d
             if (wrt_bgc_diag_2d(itrc)) then
@@ -404,7 +404,7 @@
           endif
           record_dia_his = record_dia_his + 1
           output_time_dia_his = 0
-          ierr=nf90_open(fname_his,nf90_write,ncid)
+          ierr=nf90_open_clear(fname_his,nf90_write,ncid)
           call ncwrite(ncid,'ocean_time',(/time/),(/record_dia_his/))
           do itrc=1,nr_bgc_diag_2d
             if (wrt_bgc_diag_2d(itrc)) then
@@ -451,7 +451,7 @@
         call create_file('_bgc',fname)
       endif
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       call def_vars_bgc( ncid,avg )
 
@@ -476,7 +476,7 @@
         call create_file('_bgc_dia',fname)
       endif
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       call def_bgc_diag(ncid,avg)
 

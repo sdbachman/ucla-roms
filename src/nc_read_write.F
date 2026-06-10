@@ -5,7 +5,8 @@
       use netcdf, only:
      &     nf90_float, nf90_noerr, nf90_strerror,
      &     nf90_inq_dimid, nf90_def_dim, nf90_def_var, nf90_inq_varid,
-     &     nf90_put_var, nf90_get_var
+     &     nf90_put_var, nf90_get_var, nf90_open, nf90_create
+      use fp_utils, only: clear_fp_exceptions, restore_fp_exceptions
       use error_handling_mod, only: error_log
       implicit none
       private
@@ -25,8 +26,31 @@
       public :: ncread
       public :: ncwrite
       public :: nccreate
+      public :: nf90_open_clear, nf90_create_clear
 
       contains
+
+!----------------------------------------------------------------------
+      integer function nf90_open_clear(path, mode, ncid)
+      character(len=*), intent(in) :: path
+      integer, intent(in) :: mode
+      integer, intent(out) :: ncid
+
+      call clear_fp_exceptions()
+      nf90_open_clear = nf90_open(path, mode, ncid)
+      call restore_fp_exceptions()
+      end function nf90_open_clear
+
+!----------------------------------------------------------------------
+      integer function nf90_create_clear(path, cmode, ncid)
+      character(len=*), intent(in) :: path
+      integer, intent(in) :: cmode
+      integer, intent(out) :: ncid
+
+      call clear_fp_exceptions()
+      nf90_create_clear = nf90_create(path, cmode, ncid)
+      call restore_fp_exceptions()
+      end function nf90_create_clear
 
 !----------------------------------------------------------------------
       subroutine ncread_1D(ncid,vname,dat,start)  ![

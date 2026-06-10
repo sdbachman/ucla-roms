@@ -12,7 +12,8 @@
      &     nf90_put_att, nf90_inquire_variable, nf90_inquire_dimension,
      &     nf90_get_var
       use scalars, only: time, dt, sec2day, tdays, akt_bak, akv_bak
-      use nc_read_write, only: nccreate, ncread
+      use nc_read_write, only: nf90_open_clear, nf90_create_clear,
+     &     nccreate, ncread
       use dimensions, only: bf, nx, ny, gnx, gny, i0, i1, j0, j1
       use param, only: mynode, nnodes
       use hidden_mpi_vars, only: inode, jnode
@@ -704,7 +705,7 @@
 
         found_var = .false.                                          ! reset for new file
         if (present(ungridded_filename)) then
-          ierr = nf90_open(ungridded_filename, nf90_nowrite, ncid)
+          ierr = nf90_open_clear(ungridded_filename, nf90_nowrite, ncid)
           if (ierr/=nf90_noerr) then
           call error_log%check_netcdf_status(
      &         netcdf_status=ierr,
@@ -712,7 +713,7 @@
      &            info=("error opening "//ungridded_filename))
           end if
        else
-          ierr = nf90_open(frcfile(ifile), nf90_nowrite, ncid)
+          ierr = nf90_open_clear(frcfile(ifile), nf90_nowrite, ncid)
           if (ierr/=nf90_noerr) then
           call error_log%check_netcdf_status(
      &         netcdf_status=ierr,
@@ -909,7 +910,7 @@
           call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it), nc%ungridded_forcing_file)
 
-          ierr=nf90_open(nc%ungridded_forcing_file,nf90_nowrite, ncid)
+          ierr=nf90_open_clear(nc%ungridded_forcing_file,nf90_nowrite, ncid)
           if (d1) then
             call ncread(ncid,vname,nc%vdata(:,1,it),(/1,irec/))
           else
@@ -933,7 +934,7 @@
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it))
 
-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
+      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
       ! The size of vdata must match the size of the data in the
       ! file. Ensure this in the allocation of vdata
       ! This is in contrast with the _surf version of fill_frc_slice
@@ -1010,7 +1011,7 @@
         if (mynode == 0) then
           call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it), nc%ungridded_forcing_file)
-          ierr=nf90_open(nc%ungridded_forcing_file,nf90_nowrite, ncid)
+          ierr=nf90_open_clear(nc%ungridded_forcing_file,nf90_nowrite, ncid)
           call ncread(ncid,vname,nc%vdata(:,:,:,it),(/1,1,1,irec/))
           ierr = nf90_close(ncid)
         endif
@@ -1029,7 +1030,7 @@
 
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it))
-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
+      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
       call ncread(ncid,vname,nc%vdata(i0:i1,j0:j1,:,it),(/1,1,1,irec/))
       ! add force file info to output nc
       if (mynode == 0) then
@@ -1094,7 +1095,7 @@
       call find_new_record(vname,tname,modtime,ifile,irec,
      &                         nc%times(it) )
 
-      ierr=nf90_open(frcfile(ifile),nf90_nowrite, ncid)
+      ierr=nf90_open_clear(frcfile(ifile),nf90_nowrite, ncid)
       if (nc%coarse>0) then
         if (.not.allocated(cdata)) then
           call init_coarse
@@ -1179,7 +1180,7 @@
         call append_date_node(fname)
       endif
 
-      ierr=nf90_create(trim(fname),nf90_netcdf4,ncid)
+      ierr=nf90_create_clear(trim(fname),nf90_netcdf4,ncid)
       if (ierr/=nf90_noerr) then
          call error_log%check_netcdf_status(netcdf_status=ierr,
      &        context=module_name//"/"//sr_name,
@@ -1509,8 +1510,8 @@
       integer           :: var_id
       character(len=20) :: file_var_units ! variable units in forcing file
 
-!     ierr = nf90_open(frcfile(ifile), nf90_nowrite, ncid)
-      ierr = nf90_open(file_name,nf90_nowrite,ncid)
+!     ierr = nf90_open_clear(frcfile(ifile), nf90_nowrite, ncid)
+      ierr = nf90_open_clear(file_name,nf90_nowrite,ncid)
       if (ierr/=nf90_noerr) then
          call error_log%check_netcdf_status(netcdf_status=ierr,
      &        context=module_name//"/"//sr_name,

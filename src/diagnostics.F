@@ -17,7 +17,7 @@
       use hidden_mpi_vars, only:
      &     east_msg_exch, north_msg_exch,
      &     south_msg_exch, west_msg_exch
-      use nc_read_write, only: ncwrite, ncread
+      use nc_read_write, only: nf90_open_clear, ncwrite, ncread
       use roms_read_write, only:
      &     diag_avg_output, diagnostic_opt, bfx,
      &     bfy, dn_xu, dn_yv, dn_zr, eta_v, xi_u,
@@ -763,7 +763,7 @@
         endif
         record = record + 1
 
-        ierr=nf90_open(fname,nf90_write,ncid)
+        ierr=nf90_open_clear(fname,nf90_write,ncid)
         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
         call ncwrite(ncid,'ocean_time',(/time/),(/record/))
@@ -793,7 +793,7 @@
       subroutine create_diagvars(ncid)  ![
       ! Add diagnostics variables to an opened netcdf file
 
-      use nc_read_write, only: nccreate
+      use nc_read_write, only: nf90_open_clear, nccreate
       implicit none
 
       !import/export
@@ -1001,7 +1001,7 @@
 
       call create_file('_dia',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       ! Diagnostics options
       ierr=nf90_put_att (ncid, nf90_global, 'diagnostic_options', adjustl(diagnostic_opt))

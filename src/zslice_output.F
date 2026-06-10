@@ -10,7 +10,7 @@
       use roms_read_write, only:
      &     bfx, bfy, dn_tm, dn_xr, dn_xu, dn_yr,
      &     dn_yv, eta_rho, eta_v, xi_rho, xi_u, create_file
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use netcdf, only:
      &     nf90_noerr, nf90_write, nf90_open,
      &     nf90_put_att, nf90_close
@@ -352,7 +352,7 @@
 
         if (record==nrpf) then
           call create_file('_zsl',fname)
-          ierr=nf90_open(fname,nf90_write,ncid)
+          ierr=nf90_open_clear(fname,nf90_write,ncid)
           call def_vars_zslice(ncid)
           call ncwrite(ncid,'depth',vecdep)
           ierr = nf90_close(ncid)
@@ -362,7 +362,7 @@
         if (.not. do_avg) call calc_zslice
         record = record+1
 
-        ierr=nf90_open(fname,nf90_write,ncid)
+        ierr=nf90_open_clear(fname,nf90_write,ncid)
 
         if (ierr/=nf90_noerr) then
            call error_log%check_netcdf_status(netcdf_status=ierr,

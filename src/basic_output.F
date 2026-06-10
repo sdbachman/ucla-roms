@@ -8,7 +8,7 @@
      &     nf90_double, nf90_int, nf90_global, nf90_write,
      &     nf90_inq_varid, nf90_put_var, nf90_put_att, nf90_open, nf90_close,
      &     nf90_nofill, nf90_set_fill
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use roms_read_write, only:
      &     max_name_size, dn_tm, dn_xr, dn_xu,
      &     dn_yr, dn_yv, dn_zr, eta_rho, eta_v, xi_rho, xi_u, dn_zw,
@@ -340,7 +340,7 @@
         endif
         rec_his = rec_his + 1
 
-        ierr=nf90_open(fname_his,nf90_write,ncid)
+        ierr=nf90_open_clear(fname_his,nf90_write,ncid)
         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
         call ncwrite(ncid,'ocean_time',(/time/),(/rec_his/))
@@ -460,7 +460,7 @@
           endif
         rec_avg = rec_avg + 1
 
-        ierr=nf90_open(fname_avg,nf90_write,ncid)
+        ierr=nf90_open_clear(fname_avg,nf90_write,ncid)
         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
         call ncwrite(ncid,'ocean_time',(/t_avg_ovars/),(/rec_avg/))
@@ -606,7 +606,7 @@
         total_rec_rst = total_rec_rst +1
         rec_rst = rec_rst + 1
 
-        ierr=nf90_open(fname_rst,nf90_write,ncid)
+        ierr=nf90_open_clear(fname_rst,nf90_write,ncid)
         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
         call ncwrite(ncid,'ocean_time',(/time/),(/rec_rst/))
@@ -697,7 +697,7 @@
         call create_file('_his',fname)
       endif
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       if (avg) then
         call def_vars_ocean_vars(  .true.  )
@@ -723,7 +723,7 @@
 
       call create_file('_rst',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       ierr=nf90_put_att(ncid,nf90_global,'type','ROMS restart file')
 

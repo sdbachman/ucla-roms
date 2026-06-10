@@ -10,6 +10,7 @@
       use tracers, only: init_tracers
       use mpi_f08, only: mpi_wtime
       use timers, only: tstart, tend
+      use fp_utils, only: clear_fp_exceptions
 
       implicit none                                        ! with single parallel region using
       integer :: ierr                                      ! explicit barrier synchronization.
@@ -24,6 +25,8 @@ C$    call MPI_Init_thread(req_lev, level, ierr)
 C$ !!   write(*,*) 'MPI thread support levels =', req_lev,level
 C$    ierr=0
       call MPI_Init(ierr)
+
+      call clear_fp_exceptions()
 
       call mpi_setup
       tstart=MPI_Wtime()
@@ -170,9 +173,9 @@ C$OMP BARRIER
 C$OMP BARRIER
 
 #ifdef SOLVE3D
-C$OMP MASTER                           ! Setup vertical stretching
-      call set_scoord                  ! functions for S-coordinate
-C$OMP END MASTER                       ! system
+C$OMP MASTER
+      call compute_scoord_curves
+C$OMP END MASTER
 C$OMP BARRIER
 #endif
 
@@ -209,6 +212,13 @@ CR      write(*,*) '-10' MYID
       enddo
 C$OMP BARRIER
 CR      write(*,*) '-9' MYID
+
+#ifdef SOLVE3D
+C$OMP MASTER
+      call print_scoord_diagnostics
+C$OMP END MASTER
+C$OMP BARRIER
+#endif
 
 CR      write(*,*) ' -8' MYID
 

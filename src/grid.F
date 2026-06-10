@@ -16,7 +16,7 @@
      &     nf90_noerr, nf90_nowrite, nf90_write,
      &     nf90_open, nf90_strerror, nf90_inq_varid, nf90_get_var,
      &     nf90_close
-      use nc_read_write, only: ncread
+      use nc_read_write, only: nf90_open_clear, ncread
       use dimensions, only: i0, i1, j0, j1, gnx, gny, nx, ny, nz
       use roms_read_write, only:
      &     grdname, dn_xr, dn_yr, eta_rho,
@@ -199,7 +199,7 @@
 
       call create_file('_grd',ana_grdname,.true.) ! last argument is to skip date label
 
-      ierr=nf90_open(ana_grdname,nf90_write,ncid)
+      ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
       call def_grid(ncid)
       call wrt_grid(ncid)
       ierr=nf90_close(ncid)
@@ -214,7 +214,7 @@
 ! Arguments: ncid    NetCDF unit-ID of NetCDF file, which must be
 !                            already opened and in definition mode;
 
-      use nc_read_write, only: nccreate
+      use nc_read_write, only: nf90_open_clear, nccreate
       use netcdf, only:
      &     nf90_char, nf90_double, nf90_def_var,
      &     nf90_put_att
@@ -324,7 +324,7 @@
       !                            already opened and in definition mode
 
       use netcdf, only: nf90_put_var
-      use nc_read_write, only: ncwrite
+      use nc_read_write, only: nf90_open_clear, ncwrite
       use error_handling_mod, only: error_log ! do not abort here, mynode==0
 
       implicit none
@@ -448,7 +448,7 @@
 ! Open grid netCDF file for reading. Check that dimensions in the file
 ! are consistent with the model, then read all necessary variables.
 
-      ierr=nf90_open(grdname, nf90_nowrite, ncid)
+      ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
       if (ierr == nf90_noerr) then
         ierr=checkdims (ncid, grdname, varid)
         if (ierr. ne. nf90_noerr) then

@@ -22,7 +22,7 @@
       use roms_read_write, only:
      &     dn_tm, create_file, store_string_att,
      &     particle_opt
-      use nc_read_write, only: nccreate
+      use nc_read_write, only: nf90_open_clear, nccreate
       use error_handling_mod, only: error_log
       implicit none
       private
@@ -387,7 +387,7 @@
       end subroutine seed_particles !]
 !-------------------------------------------------
       subroutine wrt_particles ![
-      use nc_read_write, only: ncwrite
+      use nc_read_write, only: nf90_open_clear, ncwrite
       implicit none
 
       ! local
@@ -402,7 +402,7 @@
       endif
       record = record + 1
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
       ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
       call ncwrite(ncid,'ocean_time',(/time/),(/record/))
@@ -455,7 +455,7 @@
       dimnames = (/dn_npart,dn_seven, dn_tm/)
       dimsizes = (/ npmx,  7,      0/)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       varid = nccreate(ncid,'particles',dimnames,dimsizes,nf90_double)
       if (ierr/=nf90_noerr) then

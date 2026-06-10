@@ -96,7 +96,8 @@
       ! subroutine
       use netcdf, only:
      &     nf90_double, nf90_noerr, nf90_nowrite,
-     &     nf90_write, nf90_open, nf90_put_att, nf90_close, nf90_inq_varid
+     &     nf90_write, nf90_put_att, nf90_close, nf90_inq_varid
+      use nc_read_write, only: nf90_open_clear
       use mpi_f08, only: mpi_double_precision, mpi_max
       implicit none
 
@@ -138,18 +139,18 @@
           enddo
         enddo
 
-        ierr=nf90_open(ana_grdname,nf90_write,ncid)
+        ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
         varid = nccreate(ncid,'river_flux',(/dn_xr,dn_yr/),(/xi_rho,eta_rho/), nf90_double)
         ierr=nf90_put_att(ncid, varid,'long_name','River volume flux')
 !       ierr=nf90_close(ncid)
 !       print *,'added river_flux',mynode
-!       ierr=nf90_open(ana_grdname,nf90_write,ncid)
+!       ierr=nf90_open_clear(ana_grdname,nf90_write,ncid)
         call ncwrite(ncid,'river_flux', rflx(i0:i1,j0:j1))
         ierr=nf90_close(ncid)
 
       else                      ! Not analytical, read from file
          ! Start by checking forcing file for separate variables
-         ierr=nf90_open(frcfile(nc_rvol%ifile), nf90_nowrite, ncid) ! open river forcing file
+         ierr=nf90_open_clear(frcfile(nc_rvol%ifile), nf90_nowrite, ncid) ! open river forcing file
          ierr = nf90_inq_varid(ncid, "river_index", varid) ! check river forcing file for index...
          ierr = ierr * nf90_inq_varid(ncid, "river_fraction", varid) ! ... and fraction variables
 
@@ -186,7 +187,7 @@
             endif
          else ! if not in the forcing file, look for a single variable in the grid file
             ierr=nf90_close(ncid)
-            ierr=nf90_open(grdname, nf90_nowrite, ncid)
+            ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
             ierr = nf90_inq_varid(ncid, riv_flx_name, varid) ! check grid file for variable
 
             if (ierr /= nf90_noerr) then ! if not in grid file

@@ -9,7 +9,7 @@
       use netcdf, only:
      &     nf90_noerr, nf90_write, nf90_inq_varid,
      &     nf90_open, nf90_put_att, nf90_close
-      use nc_read_write, only: nccreate, ncread, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncread, ncwrite
       use scalars, only: iic, tdays, time, dt
       use dimensions, only: nx, ny
       use calc_pflx_mod, only: up, vp, calc_pflx
@@ -298,7 +298,7 @@
       endif
       record = record + 1
 
-      ierr=nf90_open(fname, nf90_write, ncid)
+      ierr=nf90_open_clear(fname, nf90_write, ncid)
       if (ierr/=nf90_noerr) then
          call error_log%check_netcdf_status(netcdf_status=ierr,
      &        info="error opening "//fname,
@@ -346,7 +346,7 @@
 
       call create_file('_spn',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       varid = nccreate(ncid,'cf_south',(/dn_xr,dn_tm/),(/xi_rho,0/))
       ierr = nf90_put_att(ncid,varid,'long_name'

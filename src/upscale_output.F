@@ -13,7 +13,7 @@
       use tracers, only: t_units
       use dimensions, only: i0, i1, j0, j1
       use grid, only: latr, lonr
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use roms_read_write, only: create_file, dn_tm, dn_xr, dn_yr, dn_zr, eta_rho, xi_rho
       use netcdf, only:
      &     nf90_double, nf90_write, nf90_put_att,
@@ -397,7 +397,7 @@
       endif
 
       if (otime>=output_period_uscl) then
-        ierr=nf90_open(fname,nf90_write,ncid)
+        ierr=nf90_open_clear(fname,nf90_write,ncid)
         record_uscl = record_uscl+1
 
         start2D = (/1,1,record_uscl/)
@@ -468,7 +468,7 @@
 
       call create_file('_uscl',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       ! Make sure all necessary dimensions are in all files
       ierr=nccreate(ncid,'',(/dn_xr,dn_yr,dn_zr,dn_tm/),(/xi_rho,eta_rho,N,0/))

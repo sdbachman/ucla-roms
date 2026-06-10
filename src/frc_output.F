@@ -7,7 +7,7 @@
       use param, only: ieast, iwest, jnorth, jsouth, nsub_e, nsub_x,
      &     lm, mm, isalt, itemp, mynode
       use dimensions, only: i0, i1, j0, j1
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use roms_read_write, only:
      &     dn_tm, dn_xr, dn_xu, dn_yr, dn_yv,
      &     eta_rho, eta_v, xi_rho, xi_u, dn_zr, create_file
@@ -198,7 +198,7 @@
       output_time = output_time + dt
 
       if (output_time>=output_period) then
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
       record = record+1
       call ncwrite(ncid,'ocean_time',(/time/),(/record/))
 
@@ -297,7 +297,7 @@
 
       call create_file('_frc',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       ! Make sure all necessary dimensions are in all files
       ierr=nccreate(ncid,'',(/dn_xr,dn_yr,dn_zr,dn_tm/),(/xi_rho,eta_rho,N,0/))

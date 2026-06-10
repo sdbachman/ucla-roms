@@ -35,7 +35,7 @@
      &     nf90_inquire_dimension, nf90_noerr, nf90_nowrite,
      &     nf90_strerror, nf90_inq_varid, nf90_get_var, nf90_close,
      &     nf90_open
-      use nc_read_write, only: ncread
+      use nc_read_write, only: nf90_open_clear, ncread
       use roms_read_write, only: ininame
       use grid, only:
      &     riv_umask, riv_vmask, rmask, umask, vmask
@@ -94,7 +94,7 @@ c--#define VERBOSE
 !             (2b) nrrec < 0, THE LAST available record is used.
 
       init_type=0
-      ierr=nf90_open(ininame, nf90_nowrite, ncid)
+      ierr=nf90_open_clear(ininame, nf90_nowrite, ncid)
       write(error_info, *)
      &     'Cannot open netCDF file ''', trim(ininame), '''.'
       call error_log%check_netcdf_status(

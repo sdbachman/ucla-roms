@@ -16,7 +16,7 @@
       use roms_read_write, only:
      &     ncforce, pipe_frc_opt, grdname,
      &     set_frc_data, store_string_att
-      use nc_read_write, only: ncread
+      use nc_read_write, only: nf90_open_clear, ncread
       use param, only: n, lm, mm, nt, mynode
       use error_handling_mod, only: error_log
       implicit none
@@ -107,7 +107,7 @@
         ! pipe_flx is defined in ana_pipe_frc.h
 
       else ! Look in pipe forcing file for index and fraction vars
-         ierr = nf90_open(frcfile(nc_pvol%ifile), nf90_nowrite, ncid)
+         ierr = nf90_open_clear(frcfile(nc_pvol%ifile), nf90_nowrite, ncid)
          ierr = nf90_inq_varid(ncid, "pipe_index", varid)
          ierr = ierr * nf90_inq_varid(ncid, "pipe_fraction", varid)
 
@@ -144,7 +144,7 @@
             endif
          else ! ierr  / if not in the forcing file, look for a single variable in the grid file
         ! Read 'pipe_flux' from grid file (Pipe_idx & pipe_fraction in one value)
-            ierr=nf90_open(grdname, nf90_nowrite, ncid)
+            ierr=nf90_open_clear(grdname, nf90_nowrite, ncid)
         ! Temporarily store as pipe_fraction to avoid extra array,
         ! but value still pipe_idx + pipe_fraction
             call ncread(ncid,pipe_flx_name, pipe_fraction(i0:i1,j0:j1))

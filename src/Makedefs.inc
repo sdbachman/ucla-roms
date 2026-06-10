@@ -98,6 +98,15 @@ else
    LDR := $(MPI_WRAPPER)
 endif
 
+# C compiler for small C helpers (e.g. clear_fp.c)
+ifeq ($(COMPILER),$(filter gnu intel ifort, $(COMPILER)))
+   CC := $(shell $(MPI_WRAPPER) -show 2>/dev/null | awk '{print $$1}' | sed 's/ifx$$/icx/; s/ifort$$/icc/; s/gfortran$$/gcc/')
+endif
+ifeq ($(strip $(CC)),)
+   CC := mpicc
+endif
+CFLAGS ?=
+
 # For BUILD_MODE = "debug", always keep source code
 ifeq ($(BUILD_MODE),debug)
    KEEP_PPSRC=true
@@ -184,12 +193,14 @@ LDR += $(LDFLAGS)
 ifeq ($(COMPILER),ifort)
     FFLAGS = -O3 -ip  # Apply -ip only for ifort
 else ifeq ($(COMPILER),intel)
-    FFLAGS = -O3      # Do NOT use -ip for ifx
+    FFLAGS = -O3 -init=snan    # Do NOT use -ip for ifx
 endif
 
 # Apply debug, strict, vtune, or gprof settings for Intel compilers
 ifeq ($(COMPILER),$(filter ifort intel, $(COMPILER)))
-    ifeq ($(BUILD_MODE),debug)
+    ifeq ($(BUILD_MODE),snan)
+        FFLAGS = -O3 -init=snan -fpe0 -traceback
+    else ifeq ($(BUILD_MODE),debug)
         FFLAGS = -g -traceback -check all
     else ifeq ($(BUILD_MODE),test)
 	FFLAGS = -O0
@@ -236,7 +247,10 @@ FFLAGS+=$(USER_FFLAGS)
 # Compilation rules for file types:
 #   (used for every file until the final linking step)
 
-.SUFFIXES: $(OBJ_ext) $(PPF77_ext) $(UPF77_ext) $(UPF90_ext) $(PPF90_ext)
+.SUFFIXES: .c $(OBJ_ext) $(PPF77_ext) $(UPF77_ext) $(UPF90_ext) $(PPF90_ext)
+
+.c$(OBJ_ext):
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 #Unprocessed F90 -> object file (typically .F90->.o)
 $(UPF90_ext)$(OBJ_ext):

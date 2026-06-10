@@ -42,7 +42,7 @@
 
       use grid, only: angler, rmask, umask, vmask
       use dimensions, only: nx, ny, nz
-      use nc_read_write, only: nccreate, ncread, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncread, ncwrite
       use roms_read_write, only: findstr, create_file
       use netcdf, only:
      &     nf90_double, nf90_write, nf90_nowrite,
@@ -302,7 +302,7 @@
      &    'extract_data :: read objects: ',extract_file
       endif
 
-      ierr = nf90_open(extract_file,nf90_nowrite,ncid)
+      ierr = nf90_open_clear(extract_file,nf90_nowrite,ncid)
       call error_log%check_netcdf_status(netcdf_status=ierr,
      &     info="error reading objects file "//extract_file,
      &     context=module_name//"/"//sr_name)
@@ -604,7 +604,7 @@
 # endif
       endif
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 !     ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
 
       !! We have to update the object records regardless of whether
@@ -849,7 +849,7 @@
 
       call create_file('_ext',fname)
 
-      ierr=nf90_open(fname,nf90_write,ncid)
+      ierr=nf90_open_clear(fname,nf90_write,ncid)
 
       call create_edata_vars(ncid)
       call error_log%abort_check()

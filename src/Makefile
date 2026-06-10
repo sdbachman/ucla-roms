@@ -8,6 +8,7 @@ include Makedefs.inc
 # Build ROMS source list from unprocessed Fortran files
    SRCS_F77 = $(wildcard *$(UPF77_ext))
    SRCS_F90 = $(wildcard *$(UPF90_ext))
+   SRCS_C   = clear_fp.c
    SRCS = $(SRCS_F77) $(SRCS_F90)
 # Exclude files that are not part of main build (just f77 for now)
    EXCL = mpi_test srcscheck
@@ -28,7 +29,8 @@ include Makedefs.inc
 
    OBJS_F77 = $(RCS_F77:$(PPF77_ext)=$(OBJ_ext))
    OBJS_F90 = $(RCS_F90:$(PPF90_ext)=$(OBJ_ext))
-   OBJS = $(OBJS_F77) $(OBJS_F90)
+   OBJS_C   = $(SRCS_C:.c=$(OBJ_ext))
+   OBJS = $(OBJS_F77) $(OBJS_F90) $(OBJS_C)
 # Sort OBJS to remove duplicates
   OBJS := $(sort $(OBJS))
   $(info DEBUG: OBJS = $(OBJS))

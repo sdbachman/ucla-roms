@@ -263,7 +263,7 @@
       use dimensions, only: i0, i1, j0, j1
       use error_handling_mod, only: error_log
       use mpi_exchanges, only: exchange_xxx
-      use nc_read_write, only: ncread
+      use nc_read_write, only: nf90_open_clear, ncread
       implicit none
       character(len=10) :: sr_name = "read_tides"
       ! local
@@ -282,7 +282,7 @@
       ! search for forcing file with tidal information
       do while ((found_rec==0).and.(var_file_indx <= max_frc))
 
-        ierr=nf90_open(frcfile(var_file_indx), nf90_nowrite, ncid)
+        ierr=nf90_open_clear(frcfile(var_file_indx), nf90_nowrite, ncid)
         if(ierr/=0) then
            call error_log%check_netcdf_status(netcdf_status=ierr,
      &          context=module_name//"/"//sr_name,

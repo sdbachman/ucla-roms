@@ -18,7 +18,7 @@
       use roms_read_write, only:
      &     dn_tm, dn_xr, dn_yr, dn_zr, eta_rho,
      &     xi_rho, create_file, sec2date
-      use nc_read_write, only: nccreate, ncwrite
+      use nc_read_write, only: nf90_open_clear, nccreate, ncwrite
       use netcdf, only:
      &     nf90_noerr, nf90_write, nf90_double, nf90_open,
      &     nf90_put_att, nf90_close
@@ -547,7 +547,7 @@
 
       if (record==nrpf) then
           call create_file('_cdr',fname)
-          ierr=nf90_open(fname,nf90_write,ncid)
+          ierr=nf90_open_clear(fname,nf90_write,ncid)
           call create_cdr_output_variables(ncid)
           ierr = nf90_close(ncid)
           record = 0
@@ -555,7 +555,7 @@
 
         record = record+1
 
-        ierr=nf90_open(fname,nf90_write,ncid)
+        ierr=nf90_open_clear(fname,nf90_write,ncid)
         call error_log%check_netcdf_status(netcdf_status=ierr,
      &       info="error opening "//fname,
      &       context=module_name//"/"//sr_name)
