@@ -604,7 +604,9 @@ module pio_roms
   public  :: pio_ncwrite1
   public  :: pio_ncwrite2
   public  :: pio_ncwrite3
-  public  ::, !      public  :: pio_createFile
+  public  :: pio_open_file
+
+!      public  :: pio_createFile
 !      public  :: pio_createVar
 
   character(len=99), public     :: pio_root_name
@@ -1769,8 +1771,10 @@ contains
 
   end subroutine pio_createDecomps
 ! ----------------------------------------------------------------------
-  integer function, (iosystem, file, iotype, fname, mode) result(ierr)
+  integer function pio_open_file(iosystem, file, iotype, fname, mode) result(ierr)
     ! Open a NetCDF file through PIO and record context for error messages.
+
+    implicit none
 
     type(iosystem_desc_t), intent(inout), target :: iosystem
     type(file_desc_t), intent(out) :: file
@@ -1789,7 +1793,8 @@ contains
 
     call pio_check_ierr(ierr, operation='open', fname=trim(fname))
 
-  end function, ! ----------------------------------------------------------------------
+  end function pio_open_file
+! ----------------------------------------------------------------------
   subroutine pio_check_ierr(ierr, operation, varname, fname, irec, context)
     ! Log PIO failures with file, variable, and operation context.
 
