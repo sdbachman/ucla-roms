@@ -18,10 +18,10 @@ module surf_flux
   &nf90_global, nf90_write, nf90_nofill,&
   &nf90_open, nf90_put_att, nf90_close, nf90_set_fill
   use scalars, only: dt, iic, nt, tdays, time, day2sec
-  use pio_roms, only: pio_gtype
+  use pio_roms, only: pio_open_file, pio_gtype
 #ifdef PARALLEL_IO
   use pio_roms, only: pio_FileDesc, pio_IoSystem, pio_type, pio_file_is_open
-  use pio, only : PIO_openfile, PIO_closefile, PIO_write
+  use pio, only :  PIO_closefile, PIO_write
 #endif
   use mpi_f08, only: MPI_CHARACTER, mpi_bcast
 
@@ -463,7 +463,7 @@ subroutine wrt_sflux  ![
     ierr=nf90_close(ncid)
     endif
 
-    ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
     start=1; start(3)=record
     if (sflx_avg) then

@@ -56,10 +56,10 @@ contains
     use error_handling_mod, only: error_log
     use calc_pflx_mod, only : get_init_slow, calc_pflx
     use sponge_tune, only: get_init_ub, ub_tune
-    use pio_roms, only: use_pio, pio_gtype
+    use pio_roms, only: pio_open_file, use_pio, pio_gtype
 #ifdef PARALLEL_IO
     use pio_roms, only: pio_FileDesc, pio_IoSystem, pio_type
-    use pio, only : PIO_openfile, PIO_closefile
+    use pio, only :  PIO_closefile
 #endif
     use checkdims_mod, only: checkdims
 
@@ -408,7 +408,7 @@ contains
 ! River mask (needed for exact restarts)
 
 #ifdef PARALLEL_IO
-    ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, inifile)
+    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, inifile)
 #endif
 
     start=1; start(3)=record                                       ! 2D vars

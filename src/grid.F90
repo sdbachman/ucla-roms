@@ -24,10 +24,10 @@ module grid
   &dn_xr, dn_yr, dn_tm, particle_opt, nrrec, create_file, store_string_att
   use scalars, only: init
   use roms_mpi, only: exchange_xxx
-  use pio_roms, only: use_pio, pio_gtype
+  use pio_roms, only: pio_open_file, use_pio, pio_gtype
 #ifdef PARALLEL_IO
   use pio_roms, only: pio_FileDesc, pio_IoSystem, pio_type
-  use pio, only : PIO_openfile, PIO_closefile
+  use pio, only :  PIO_closefile
 #endif
   use instant_output, only: wrt_instant
   implicit none
@@ -461,7 +461,7 @@ contains
 !===== == ==== =======
 
 #ifdef PARALLEL_IO
-    ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, grdname)
+    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, grdname)
 #endif
 
     start=1; start(3)=0      ! starting indices in netcdf file. Might not be needed here

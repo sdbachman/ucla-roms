@@ -32,10 +32,10 @@ module diagnostics
   &umask
   use roms_mpi, only: exchange_xxx
   use grid, only: vmask, rmask
-  use pio_roms, only: use_pio, pio_gtype
+  use pio_roms, only: pio_open_file, use_pio, pio_gtype
 #ifdef PARALLEL_IO
   use pio_roms, only: pio_FileDesc, pio_IoSystem, pio_type
-  use pio, only: PIO_openfile, PIO_closefile, PIO_write
+  use pio, only :  PIO_closefile, PIO_write
 #endif
   use mpi_f08, only: MPI_CHARACTER, mpi_bcast, MPI_Barrier
 
@@ -806,7 +806,7 @@ contains
         ierr=nf90_close(ncid)
       endif
       call MPI_Barrier(ocean_grid_comm, ierr)
-      ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 #else
       ierr=nf90_open(fname,nf90_write,ncid)
       ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)

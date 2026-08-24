@@ -13,8 +13,10 @@ module pio_roms
   use pio, only : PIO_iotype_pnetcdf
   use pio, only : PIO_offset_kind
   use pio, only : PIO_setdebuglevel
+  use pio, only : PIO_BCAST_ERROR, PIO_seterrorhandling, PIO_strerror
   use pio_nf, only : PIO_inq_varid, PIO_inq_dimid
   use pionfatt_mod, only : put_att_desc_text
+  use error_handling_mod, only: error_log
   use mpi_f08, only: mpi_character, mpi_wtime
   use param, only: LLm, MMm, nz, ocean_grid_comm, nt, mynode
   use timers, only: tstart
@@ -31,8 +33,10 @@ module pio_roms
 #else
   logical, parameter :: pio_force_nofill = .false.
 #endif
-  ! Name of the currently open forcing file (must fit max_name_size paths)
+  ! Name of the currently open forcing file (legacy short name)
   character(len=256),public :: pio_frcfile
+  ! Full path of the NetCDF file currently open through PIO
+  character(len=1024),public :: pio_current_file = ''
   !> @brief Rank of processor running the code.
   integer(kind=4), public :: pio_myRank
   !> @brief Number of processors participating in MPI communicator.
@@ -600,8 +604,7 @@ module pio_roms
   public  :: pio_ncwrite1
   public  :: pio_ncwrite2
   public  :: pio_ncwrite3
-
-!      public  :: pio_createFile
+  public  ::, !      public  :: pio_createFile
 !      public  :: pio_createVar
 
   character(len=99), public     :: pio_root_name
@@ -1222,6 +1225,10 @@ contains
     &pio_IoSystem,&           ! iosystem
     &base=pio_optBase)          ! base (optional argument)
 
+    ! Return PIO errors to ROMS instead of aborting inside PIO with no
+    ! file/variable context.  Errors are broadcast to all ranks.
+    call PIO_seterrorhandling(pio_IoSystem, PIO_BCAST_ERROR)
+
     call pio_createDecomps
 
   end subroutine pio_initialize
@@ -1762,6 +1769,114 @@ contains
 
   end subroutine pio_createDecomps
 ! ----------------------------------------------------------------------
+  integer function, (iosystem, file, iotype, fname, mode) result(ierr)
+    ! Open a NetCDF file through PIO and record context for error messages.
+
+    type(iosystem_desc_t), intent(inout), target :: iosystem
+    type(file_desc_t), intent(out) :: file
+    integer, intent(in) :: iotype
+    character(len=*), intent(in) :: fname
+    integer, intent(in), optional :: mode
+
+    if (present(mode)) then
+      ierr = PIO_openfile(iosystem, file, iotype, fname, mode)
+    else
+      ierr = PIO_openfile(iosystem, file, iotype, fname)
+    endif
+
+    pio_current_file = trim(fname)
+    pio_frcfile = pio_current_file(1:len(pio_frcfile))
+
+    call pio_check_ierr(ierr, operation='open', fname=trim(fname))
+
+  end function, ! ----------------------------------------------------------------------
+  subroutine pio_check_ierr(ierr, operation, varname, fname, irec, context)
+    ! Log PIO failures with file, variable, and operation context.
+
+    integer, intent(in) :: ierr
+    character(len=*), intent(in) :: operation
+    character(len=*), intent(in), optional :: varname, fname, context
+    integer, intent(in), optional :: irec
+
+    character(len=1024) :: info
+    character(len=256) :: pio_msg
+    character(len=512) :: sr_context
+    character(len=32) :: status_str, frame_str, strerr_str
+    integer :: str_ierr, path_len
+
+    if (ierr == PIO_noerr) return
+
+    pio_msg = 'unknown PIO error'
+    str_ierr = PIO_strerror(ierr, pio_msg)
+
+    write(status_str,'(I0)') ierr
+    info = 'PIO operation: '//trim(operation)
+
+    if (present(fname)) then
+      path_len = len_trim(fname)
+      write(info(len_trim(info)+1:), '(A,I0,A)') ' on file (len=', path_len, '):'
+      info = trim(info)//new_line('A')//trim(fname)
+    else if (len_trim(pio_current_file) > 0) then
+      path_len = len_trim(pio_current_file)
+      write(info(len_trim(info)+1:), '(A,I0,A)') ' on file (len=', path_len, '):'
+      info = trim(info)//new_line('A')//trim(pio_current_file)
+    else
+      info = trim(info)//new_line('A')//'File: (none recorded)'
+    endif
+
+    if (present(varname)) then
+      info = trim(info)//new_line('A')//'Variable: '//trim(varname)
+    endif
+
+    if (present(irec)) then
+      write(frame_str,'(I0)') irec
+      info = trim(info)//new_line('A')//'Record/frame: '//trim(frame_str)
+    endif
+
+    info = trim(info)//new_line('A')//'Grid type (pio_gtype): '//trim(pio_gtype)
+    info = trim(info)//new_line('A')//'PIO status code: '//trim(status_str)
+    if (str_ierr == PIO_noerr) then
+      info = trim(info)//new_line('A')//'PIO message: '//trim(pio_msg)
+    else
+      write(strerr_str,'(I0)') str_ierr
+      info = trim(info)//new_line('A')//&
+      &'Could not look up PIO message (strerror status='//trim(strerr_str)//')'
+    endif
+
+    if (present(context)) then
+      sr_context = trim(context)
+    else
+      sr_context = 'pio_roms/'//trim(operation)
+    endif
+
+    call error_log%raise_from_rank(context=sr_context, info=info)
+
+  end subroutine pio_check_ierr
+! ----------------------------------------------------------------------
+  subroutine pio_finish_transfer(ierr, operation, varName, io_done, sr_name, irec)
+    ! Common tail for pio_ncread/write after darray transfer.
+
+    integer, intent(in) :: ierr
+    character(len=*), intent(in) :: operation, varName, sr_name
+    logical, intent(in) :: io_done
+    integer, intent(in), optional :: irec
+
+    if (io_done) then
+      if (present(irec)) then
+        call pio_check_ierr(ierr, operation, varname=varName, irec=irec,&
+        &context='pio_roms/'//trim(sr_name))
+      else
+        call pio_check_ierr(ierr, operation, varname=varName,&
+        &context='pio_roms/'//trim(sr_name))
+      endif
+    else
+      call error_log%raise_from_rank(&
+      &context='pio_roms/'//trim(sr_name),&
+      &info='Unknown pio_gtype='//trim(pio_gtype)//' for variable '//trim(varName))
+    endif
+
+  end subroutine pio_finish_transfer
+! ----------------------------------------------------------------------
   subroutine pio_ncread1(varName, arr, irec)
 
     implicit none
@@ -1772,39 +1887,57 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: read_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName)
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    read_done = .false.
     if (pio_gtype == 'n1rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n1r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'n1ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n1u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'n1vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n1v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's1rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s1r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's1ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s1u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's1vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s1v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e1rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e1r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e1ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e1u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e1vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e1v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w1rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w1r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w1ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w1u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w1vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w1v_r, arr, ierr)
+      read_done = .true.
     endif
+
+    call pio_finish_transfer(ierr, 'read_darray', varName, read_done,&
+    &'pio_ncread1', irec)
 
   end subroutine pio_ncread1
 ! ----------------------------------------------------------------------
@@ -1818,51 +1951,75 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: read_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName, context='pio_roms/pio_ncread2')
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    read_done = .false.
     if (pio_gtype == 'n2rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n2r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'n2ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n2u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'n2vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_n2v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's2rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s2r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's2ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s2u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 's2vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_s2v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e2rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e2r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e2ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e2u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'e2vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_e2v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w2rr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w2r_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w2ur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w2u_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == 'w2vr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_w2v_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Drr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Dr_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Dur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Du_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Dvr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Dv_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Crr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Cr_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Cur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Cu_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '2Cvr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_2Cv_r, arr, ierr)
+      read_done = .true.
     endif
+
+    call pio_finish_transfer(ierr, 'read_darray', varName, read_done,&
+    &'pio_ncread2', irec)
 
   end subroutine pio_ncread2
 ! ----------------------------------------------------------------------
@@ -1876,21 +2033,30 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: read_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName, context='pio_roms/pio_ncread3')
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    read_done = .false.
     if (pio_gtype == '3Drr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_3Dr_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '3Dur') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_3Du_r, arr, ierr)
+      read_done = .true.
     elseif (pio_gtype == '3Dvr') then
       call PIO_read_darray(pio_FileDesc, varId, pio_desc_3Dv_r, arr, ierr)
+      read_done = .true.
     endif
+
+    call pio_finish_transfer(ierr, 'read_darray', varName, read_done,&
+    &'pio_ncread3', irec)
 
   end subroutine pio_ncread3
 ! ----------------------------------------------------------------------
@@ -1904,65 +2070,95 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: io_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName, context='pio_roms/pio_ncwrite1')
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    io_done = .false.
     if (pio_gtype == 'n1rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n1r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n1uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n1u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n1vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n1v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s1r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s1u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s1v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e1r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e1u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e1v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w1r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w1u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w1v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n1rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdnr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n1uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdnu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n1vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdnv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdsr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdsu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's1vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdsv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chder_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdeu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e1vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdev_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdwr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdwu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w1vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_1Chdwv_w, arr, ierr)
+      io_done = .true.
     endif
 
-        call PIO_syncfile(pio_FileDesc)
+    call pio_finish_transfer(ierr, 'write_darray', varName, io_done,&
+    &'pio_ncwrite1', irec)
+
+    call PIO_syncfile(pio_FileDesc)
 
   end subroutine pio_ncwrite1
 ! ----------------------------------------------------------------------
@@ -1976,77 +2172,113 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: io_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName, context='pio_roms/pio_ncwrite2')
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    io_done = .false.
     if (pio_gtype == 'n2rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n2r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n2uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n2u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n2vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_n2v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s2r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s2u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_s2v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e2r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e2u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_e2v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2rw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w2r_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2uw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w2u_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2vw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_w2v_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Drw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Dr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Duw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Du_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Dvw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Dv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Crw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Cr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Cuw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Cu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '2Cvw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Cv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n2rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdnr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n2uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdnu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'n2vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdnv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdsr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdsu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 's2vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdsv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chder_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdeu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'e2vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdev_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2rc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdwr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2uc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdwu_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == 'w2vc') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_2Chdwv_w, arr, ierr)
+      io_done = .true.
     endif
 
-        call PIO_syncfile(pio_FileDesc)
+    call pio_finish_transfer(ierr, 'write_darray', varName, io_done,&
+    &'pio_ncwrite2', irec)
+
+    call PIO_syncfile(pio_FileDesc)
 
   end subroutine pio_ncwrite2
 ! ----------------------------------------------------------------------
@@ -2060,31 +2292,44 @@ contains
 
     type(var_desc_t) :: varId
     integer(kind=4) :: ierr
+    logical :: io_done
 
     ierr = PIO_inq_varid(pio_FileDesc, trim(varName), varId)
+    call pio_check_ierr(ierr, 'inq_varid', varname=varName, context='pio_roms/pio_ncwrite3')
 
     if (present(irec)) then
       frame = irec
       call PIO_setframe(pio_FileDesc, varId, frame)
     endif
 
+    io_done = .false.
     if (pio_gtype == '3Drw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Dr_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Duw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Du_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Dvw') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Dv_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Dww') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Dw_w, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Drz') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Dr_z, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Duz') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Du_z, arr, ierr)
+      io_done = .true.
     elseif (pio_gtype == '3Dvz') then
       call PIO_write_darray(pio_FileDesc, varId, pio_desc_3Dv_z, arr, ierr)
+      io_done = .true.
     endif
 
-        call PIO_syncfile(pio_FileDesc)
+    call pio_finish_transfer(ierr, 'write_darray', varName, io_done,&
+    &'pio_ncwrite3', irec)
+
+    call PIO_syncfile(pio_FileDesc)
 
   end subroutine pio_ncwrite3
 ! ----------------------------------------------------------------------

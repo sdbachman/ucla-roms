@@ -28,8 +28,8 @@ module roms_read_write
   use pio_roms, only: pio_xi_rho_coarse_start, pio_eta_rho_coarse_start,pio_xi_u_coarse_start, pio_eta_v_coarse_start,&
   &pio_xi_rho_coarse, pio_eta_rho_coarse, pio_xi_u_coarse, pio_eta_v_coarse,&
   &pio_i0c, pio_i1c, pio_j0c, pio_j1c, pio_initialize_coarse, pio_IoSystem, pio_FileDesc, pio_type,&
-  &pio_file_is_open, pio_frcfile
-  use pio, only : PIO_openfile, PIO_closefile
+  &pio_file_is_open, pio_frcfile, pio_open_file
+  use pio, only : PIO_closefile
 #endif
   use error_handling_mod, only: error_log ! Note, abort_check should be called by caller of set_frc_data
   use instant_output, only: wrt_instant, instant_root_name
@@ -1200,7 +1200,7 @@ contains
           pio_file_is_open = 0
         endif
         if (pio_file_is_open == 0) then
-          ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+          ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
           pio_frcfile = frcfiles(ifile)
           pio_file_is_open = 1
         endif
@@ -1344,7 +1344,7 @@ contains
           pio_file_is_open = 0
         endif
         if (pio_file_is_open == 0) then
-          ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+          ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
           pio_frcfile = frcfiles(ifile)
           pio_file_is_open = 1
         endif
@@ -1458,7 +1458,7 @@ contains
         pio_file_is_open = 0
       endif
       if (pio_file_is_open == 0) then
-        ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
         pio_frcfile = frcfiles(ifile)
         pio_file_is_open = 1
       endif

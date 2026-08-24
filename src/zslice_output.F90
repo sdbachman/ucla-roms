@@ -19,10 +19,10 @@ module zslice_output
   use ocean_vars, only: u, v, z_w, z_r
   use tracers, only: t, t_vname, t_lname, t_units
   use error_handling_mod, only: error_log
-  use pio_roms, only: pio_gtype
+  use pio_roms, only: pio_open_file, pio_gtype
 #ifdef PARALLEL_IO
   use pio_roms, only: pio_FileDesc, pio_IoSystem, pio_type, pio_initialize_z
-  use pio, only : PIO_openfile, PIO_closefile, PIO_write
+  use pio, only :  PIO_closefile, PIO_write
 #endif
   use mpi_f08, only: MPI_CHARACTER, MPI_Barrier, mpi_bcast
 
@@ -450,7 +450,7 @@ contains
       call error_log%abort_check()
       call MPI_Barrier(ocean_grid_comm, ierr)
 
-      ierr = PIO_openfile(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
       pio_gtype = '3Drz'
       if (wrt_T_zslice) then
