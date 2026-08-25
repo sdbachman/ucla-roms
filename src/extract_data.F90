@@ -783,7 +783,7 @@ contains
       endif
 
       call MPI_Barrier(ocean_grid_comm, ierr)
-      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 #else
       ierr=nf90_open(fname,nf90_write,ncid)
 #endif

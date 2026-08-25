@@ -153,7 +153,7 @@ contains
       if (ierr == nf90_noerr) then
 #ifdef PARALLEL_IO
         pio_gtype = '2Drr'
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(nc_pvol%ifile))
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(nc_pvol%ifile))
         call ncread(ncid, "pipe_index", pidx_real(x0:x1,y0:y1))
         call ncread(ncid, "pipe_fraction", pipe_fraction(x0:x1,y0:y1))
         call PIO_closefile(pio_FileDesc)
@@ -196,7 +196,7 @@ contains
         ! but value still pipe_idx + pipe_fraction
 #ifdef PARALLEL_IO
         pio_gtype = '2Drr'
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, grdname)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, grdname)
         call ncread(ncid,pipe_flx_name, pipe_fraction(x0:x1,y0:y1))
         call PIO_closefile(pio_FileDesc)
 #else

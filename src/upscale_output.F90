@@ -530,7 +530,7 @@ contains
       call error_log%abort_check()
       call MPI_Barrier(ocean_grid_comm, ierr)
 
-      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
       ncid = 0  ! unused when PP=.true.; required by ncwrite interface
 
       if (.not. coords_written) then

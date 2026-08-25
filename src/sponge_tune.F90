@@ -401,7 +401,7 @@ contains
     ierr=nf90_close(ncid)
     endif
 
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
     ! fluxes and ub coefficients are defined as nx, ny sized arrays
     ! so use method 2 for output (see roms_read_write)

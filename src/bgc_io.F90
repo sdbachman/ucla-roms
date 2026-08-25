@@ -290,7 +290,7 @@ contains
           ierr=nf90_close(ncid)
         endif
 
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
 
         pio_gtype = '3Drw'
         do itrc=iTandS+nt_passive+2*nt_cdr_oae+nt_cdr_dor+1, nt
@@ -343,7 +343,7 @@ contains
           call ncwrite(ncid,'ocean_time',(/time/),(/record_his/))
           ierr=nf90_close(ncid)
         endif
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
         pio_gtype = '3Drw'
         do itrc=iTandS+nt_passive+2*nt_cdr_oae+nt_cdr_dor+1, nt
           if (wrt_t(itrc)) then
@@ -518,7 +518,7 @@ contains
           ierr=nf90_close(ncid)
         endif
 
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
 
         pio_gtype = '2Drw'
         do itrc=1,nr_bgc_diag_2d
@@ -612,7 +612,7 @@ contains
           ierr=nf90_close(ncid)
         endif
 
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
 
         pio_gtype = '2Drw'
         do itrc=1,nr_bgc_diag_2d

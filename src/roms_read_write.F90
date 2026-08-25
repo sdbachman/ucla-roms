@@ -1200,7 +1200,7 @@ contains
           pio_file_is_open = 0
         endif
         if (pio_file_is_open == 0) then
-          ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+          ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
           pio_frcfile = frcfiles(ifile)
           pio_file_is_open = 1
         endif
@@ -1344,7 +1344,7 @@ contains
           pio_file_is_open = 0
         endif
         if (pio_file_is_open == 0) then
-          ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+          ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
           pio_frcfile = frcfiles(ifile)
           pio_file_is_open = 1
         endif
@@ -1458,7 +1458,7 @@ contains
         pio_file_is_open = 0
       endif
       if (pio_file_is_open == 0) then
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(ifile))
         pio_frcfile = frcfiles(ifile)
         pio_file_is_open = 1
       endif

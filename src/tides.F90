@@ -339,7 +339,7 @@ contains
 #ifdef PARALLEL_IO
     ! open once for all constituents (re-opening per constituent leaked
     ! the previous PIO file handle)
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(var_file_indx))
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(var_file_indx))
 #endif
 
     do itide = 1,ntides

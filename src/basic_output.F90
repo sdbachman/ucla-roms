@@ -463,7 +463,7 @@ contains                  !]
         call error_log%abort_check()
         call MPI_Barrier(ocean_grid_comm, ierr)
 
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_his), PIO_write)
 
         start=1; start(3)=rec_his                                    ! back to 2D vars
         pio_gtype = '2Drw'
@@ -684,7 +684,7 @@ contains                  !]
 
         call MPI_Barrier(ocean_grid_comm, ierr)
 
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_avg), PIO_write)
 
         start=1; start(3)=rec_avg                                    ! back to 2D vars
         pio_gtype = '2Drw'
@@ -909,7 +909,7 @@ contains                  !]
     call error_log%abort_check()
     call MPI_Barrier(ocean_grid_comm, ierr)
 
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname_rst), PIO_write)
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname_rst), PIO_write)
 
     start=1; start(3)=rec_rst                                    ! back to 2D vars
     pio_gtype = '2Drw'

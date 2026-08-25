@@ -197,7 +197,7 @@ contains
       if (ierr == nf90_noerr) then ! Found the variables in the forcing file
         pio_gtype = '2Drr'
 #ifdef PARALLEL_IO
-        ierr =, (pio_IoSystem, pio_FileDesc, pio_type, frcfiles(nc_rvol%ifile))
+        ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, frcfiles(nc_rvol%ifile))
 #endif
         call ncread(ncid,"river_index",ridx_real(x0:x1,y0:y1))
         call ncread(ncid,"river_fraction",rfrc(x0:x1,y0:y1))
@@ -253,7 +253,7 @@ contains
         else
           pio_gtype='2Drr'
 #ifdef PARALLEL_IO
-          ierr =, (pio_IoSystem, pio_FileDesc, pio_type, grdname)
+          ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, grdname)
 #endif
           call ncread(ncid,riv_flx_name,rflx(x0:x1,y0:y1))
 #ifdef PARALLEL_IO

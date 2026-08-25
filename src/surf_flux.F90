@@ -463,7 +463,7 @@ subroutine wrt_sflux  ![
     ierr=nf90_close(ncid)
     endif
 
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
     start=1; start(3)=record
     if (sflx_avg) then

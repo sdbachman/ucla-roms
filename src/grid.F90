@@ -461,7 +461,7 @@ contains
 !===== == ==== =======
 
 #ifdef PARALLEL_IO
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, grdname)
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, grdname)
 #endif
 
     start=1; start(3)=0      ! starting indices in netcdf file. Might not be needed here

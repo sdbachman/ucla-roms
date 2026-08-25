@@ -806,7 +806,7 @@ contains
         ierr=nf90_close(ncid)
       endif
       call MPI_Barrier(ocean_grid_comm, ierr)
-      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 #else
       ierr=nf90_open(fname,nf90_write,ncid)
       ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)

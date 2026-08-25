@@ -408,7 +408,7 @@ contains
 ! River mask (needed for exact restarts)
 
 #ifdef PARALLEL_IO
-    ierr =, (pio_IoSystem, pio_FileDesc, pio_type, inifile)
+    ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, inifile)
 #endif
 
     start=1; start(3)=record                                       ! 2D vars

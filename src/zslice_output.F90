@@ -450,7 +450,7 @@ contains
       call error_log%abort_check()
       call MPI_Barrier(ocean_grid_comm, ierr)
 
-      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
       pio_gtype = '3Drz'
       if (wrt_T_zslice) then

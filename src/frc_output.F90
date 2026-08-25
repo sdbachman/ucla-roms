@@ -246,7 +246,7 @@ contains
       endif
       call error_log%abort_check()
       call MPI_Barrier(ocean_grid_comm, ierr)
-      ierr =, (pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
+      ierr = pio_open_file(pio_IoSystem, pio_FileDesc, pio_type, trim(fname), PIO_write)
 
       if (wrt_frc_avg) then
 #ifdef BULK_FRC
