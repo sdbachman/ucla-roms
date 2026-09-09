@@ -70,6 +70,7 @@ These switches control the numerical schemes used by the model for advection.
 |--------|-------------|---------|-------------|
 | `AKIMA` | Use the fourth-order Akima scheme for horizontal advection | disabled | Overrides the default 3rd-order upstream advection |
 | `AKIMA_V` | Use the fourth-order Akima scheme for vertical advection | disabled | Overrides the default piecewise parabolic reconstruction |
+| `HSIMT_V` | Use HSIMT (Wu and Zhu, 2010) with TVD limiter for vertical tracer advection | disabled | Monotonic alternative to `SPLINE_TS` / `AKIMA_V`; mutually exclusive with `AKIMA_V` |
 
 ### `BOUNDARY CONDITIONS`
 

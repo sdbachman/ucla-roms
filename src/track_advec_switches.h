@@ -72,6 +72,16 @@ end if
 
 cpps(is:ie)='AKIMA_V'
 # endif
+# ifdef HSIMT_V
+is=ie+2 ; ie=is+6
+if (ie>max_opt_size) then
+  call error_log%raise_global(&
+  &info=error_info,&
+  &context=sr_name)
+end if
+
+cpps(is:ie)='HSIMT_V'
+# endif
 # ifdef SPLINE_TS
 is=ie+2 ; ie=is+8
 if (ie>max_opt_size) then

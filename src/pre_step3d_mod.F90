@@ -63,7 +63,7 @@ contains
 #ifdef NHMG
     use mg_namelist, only: surface_neumann
 #endif
-    use ocean_vars, only: wi, we, flxv, flxu, hz, z_w, u, v
+    use ocean_vars, only: wi, we, flxv, flxu, hz, z_w, z_r, u, v
     use scalars, only:&
     &nz, dt, forw_start, iic, nnew, nrhs, nstp, nt,&
     &rdrg, vonkar, zob, ntstart
@@ -98,6 +98,11 @@ contains
     real(kind=8), parameter ::  delta=0.1666666666666667_8 !! delta=0.125_8
 # ifdef UPSTREAM_UV
     real(kind=8), parameter :: gamma=0.3333333333333333_8 !! gamma=0.25_8
+# endif
+# ifdef HSIMT_V
+    real(kind=8) :: a1, b1, beta, r_ratio, rka, sw, cff1
+    real(kind=8), parameter :: hsimt_eps=1.0D-12
+    real(kind=8), parameter :: cc1=0.25_8, cc2=0.5_8, cc3=1._8/12._8
 # endif
     integer(kind=4) indx, itrc, iAkt
 

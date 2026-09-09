@@ -121,6 +121,11 @@ contains
 # endif
   real(kind=8) cff
   real(kind=8), parameter :: epsil=1.D-33
+# ifdef HSIMT_V
+  real(kind=8) :: a1, b1, beta, r_ratio, rka, sw, cff1
+  real(kind=8), parameter :: hsimt_eps=1.0D-12
+  real(kind=8), parameter :: cc1=0.25_8, cc2=0.5_8, cc3=1._8/12._8
+# endif
   integer(kind=4) itrc, iAkt
 # ifdef ADV_ISONEUTRAL
   integer(kind=4) k1,k2

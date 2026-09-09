@@ -6,10 +6,19 @@
 ! the boundary), or (ii) so-called "natural" b.c.: assuming that
 ! tracer distributions in the top- and bottom-most grid boxes are
 ! linear (if no CPP switch is defined).
+!
+! Alternatives to the default spline:
+!   AKIMA_V  — fourth-order Akima vertical advection
+!   HSIMT_V  — HSIMT (Wu and Zhu, 2010) with TVD limiter (monotonic)
+! Enable either via cppdefs.opt (#define HSIMT_V or AKIMA_V); SPLINE_TS
+! is selected automatically when neither is set.
 
-#define SPLINE_TS
-!#define NEUMANN_TS
 !#define AKIMA_V
+!#define HSIMT_V
+#if !(defined AKIMA_V || defined HSIMT_V)
+# define SPLINE_TS
+#endif
+!#define NEUMANN_TS
 
 #ifdef BIO_1ST_USTREAM_TEST
 if (itrc > isalt) then   !<-- biological components only
@@ -69,6 +78,72 @@ else
     FC(i,nz)=0._8                         ! Set top and bottom
     FC(i,0)=0._8                         ! boundary conditions.
   enddo
+#elif defined HSIMT_V
+!
+!  HSIMT vertical advection (Wu and Zhu, 2010) with TVD limiter.
+!  Scratch: WC holds KaZ (1-|CFL|); CF holds tracer differences gradZ.
+!  Flux units match We [m^3/s] * T (same as other schemes here).
+!
+  do i=istr,iend
+    WC(i,0)=0._8
+    CF(i,0)=0._8
+    do k=1,nz-1
+      cff=pm(i,j)*pn(i,j)*dt
+      WC(i,k)=1._8-abs( cff*We(i,j,k)&
+     &                /(z_r(i,j,k+1)-z_r(i,j,k)) )
+      CF(i,k)=t(i,j,k+1,nrhs,itrc)-t(i,j,k,nrhs,itrc)
+    enddo
+    WC(i,nz)=0._8
+    CF(i,nz)=0._8
+!
+    do k=1,nz-1
+      cff1=We(i,j,k)
+      if ((k.eq.1).and.(cff1.ge.0._8)) then
+        FC(i,k)=cff1*t(i,j,k,nrhs,itrc)
+      else if ((k.eq.nz-1).and.(cff1.lt.0._8)) then
+        FC(i,k)=cff1*t(i,j,k+1,nrhs,itrc)
+      else if (WC(i,k).le.hsimt_eps) then
+!  Near/above unity CFL: fall back to first-order upstream.
+        FC(i,k)=t(i,j,k  ,nrhs,itrc)*max(cff1,0._8)&
+     &         +t(i,j,k+1,nrhs,itrc)*min(cff1,0._8)
+      else
+        if (cff1.ge.0._8) then
+          if (abs(CF(i,k)).le.hsimt_eps) then
+            r_ratio=0._8
+            rka=0._8
+          else
+            r_ratio=CF(i,k-1)/CF(i,k)
+            rka=WC(i,k-1)/max(WC(i,k),hsimt_eps)
+          endif
+          a1= cc1*WC(i,k)+cc2-cc3/max(WC(i,k),hsimt_eps)
+          b1=-cc1*WC(i,k)+cc2+cc3/max(WC(i,k),hsimt_eps)
+          beta=a1+b1*r_ratio
+          cff=0.5_8*max(0._8,&
+     &                  min(2._8, 2._8*r_ratio*rka, beta))*&
+     &        CF(i,k)*WC(i,k)
+          sw=t(i,j,k,nrhs,itrc)+cff
+        else
+          if (abs(CF(i,k)).le.hsimt_eps) then
+            r_ratio=0._8
+            rka=0._8
+          else
+            r_ratio=CF(i,k+1)/CF(i,k)
+            rka=WC(i,k+1)/max(WC(i,k),hsimt_eps)
+          endif
+          a1= cc1*WC(i,k)+cc2-cc3/max(WC(i,k),hsimt_eps)
+          b1=-cc1*WC(i,k)+cc2+cc3/max(WC(i,k),hsimt_eps)
+          beta=a1+b1*r_ratio
+          cff=0.5_8*max(0._8,&
+     &                  min(2._8, 2._8*r_ratio*rka, beta))*&
+     &        CF(i,k)*WC(i,k)
+          sw=t(i,j,k+1,nrhs,itrc)-cff
+        endif
+        FC(i,k)=cff1*sw
+      endif
+    enddo
+    FC(i,0)=0._8
+    FC(i,nz)=0._8
+  enddo              !--> discard WC, CF
 #elif defined AKIMA_V
   do k=1,nz-1
     do i=istr,iend

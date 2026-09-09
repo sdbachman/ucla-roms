@@ -182,6 +182,11 @@
 ! Usage notes: Overrides the default piecewise parabolic reconstruction
 #undef AKIMA_V
 
+! Use HSIMT (Wu and Zhu, 2010) with TVD limiter for vertical tracer advection
+! Usage notes: Monotonic alternative to SPLINE_TS / AKIMA_V. Mutually exclusive
+! with AKIMA_V; when neither is set, SPLINE_TS is used.
+#undef HSIMT_V
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!! BOUNDARY CONDITIONS !!!!!!!!!!!!!!!!!!!!!!!!!
 
