@@ -12,6 +12,10 @@
 !   HSIMT_V  — HSIMT (Wu and Zhu, 2010) with TVD limiter (monotonic)
 ! Enable either via cppdefs.opt (#define HSIMT_V or AKIMA_V); SPLINE_TS
 ! is selected automatically when neither is set.
+!
+! Optional under SPLINE_TS:
+!   LINROOD_PPM — Lin (2004) modified PPM monotonicity constraint
+!                 (Lin & Rood 1996 framework) on the parabolic edges
 
 !#define AKIMA_V
 !#define HSIMT_V
@@ -19,6 +23,7 @@
 # define SPLINE_TS
 #endif
 !#define NEUMANN_TS
+!#define LINROOD_PPM
 
 #ifdef BIO_1ST_USTREAM_TEST
 if (itrc > isalt) then   !<-- biological components only
@@ -70,14 +75,60 @@ else
   do k=nz-1,0,-1    !<-- recursive
     do i=istr,iend
       FC(i,k)=FC(i,k)-CF(i,k+1)*FC(i,k+1)
-
+    enddo
+  enddo              !--> FC = continuous interface tracer values
+                     !    (discard CF tridiagonal coeffs)
+# ifdef LINROOD_PPM
+!
+!  Lin (2004) improved full monotonicity constraint (lmt=1), as used
+!  with Lin & Rood (1996) PPM.  Van Leer–limited slope dm, then edge
+!  values of each cell's parabola are clipped toward the cell mean.
+!  Scratch: WC = limited bottom edge qL; CF = limited top edge qR.
+!  Flux at interface k uses the upwind cell's facing edge.
+!
+  do k=1,nz
+    do i=istr,iend
+      if ((k.eq.1).or.(k.eq.nz)) then
+        dm=0._8
+      else
+        dm=0.25_8*(t(i,j,k+1,nrhs,itrc)-t(i,j,k-1,nrhs,itrc))
+        qmax=max(t(i,j,k-1,nrhs,itrc),t(i,j,k,nrhs,itrc),&
+     &           t(i,j,k+1,nrhs,itrc))-t(i,j,k,nrhs,itrc)
+        qmin=t(i,j,k,nrhs,itrc)-min(t(i,j,k-1,nrhs,itrc),&
+     &           t(i,j,k,nrhs,itrc),t(i,j,k+1,nrhs,itrc))
+        dm=sign(min(abs(dm),qmin,qmax),dm)
+      endif
+      qmp=2._8*dm
+      WC(i,k)=t(i,j,k,nrhs,itrc)-sign(min(abs(qmp),&
+     &        abs(FC(i,k-1)-t(i,j,k,nrhs,itrc))),qmp)
+      CF(i,k)=t(i,j,k,nrhs,itrc)+sign(min(abs(qmp),&
+     &        abs(FC(i,k  )-t(i,j,k,nrhs,itrc))),qmp)
+    enddo
+  enddo
+  do k=1,nz-1
+    do i=istr,iend
+      if (We(i,j,k).ge.0._8) then
+        FC(i,k)=We(i,j,k)*CF(i,k)       !<-- top edge of cell k
+      else
+        FC(i,k)=We(i,j,k)*WC(i,k+1)     !<-- bottom edge of cell k+1
+      endif
+    enddo
+  enddo
+  do i=istr,iend
+    FC(i,nz)=0._8
+    FC(i,0)=0._8
+  enddo              !--> discard WC, CF
+# else
+  do k=0,nz-1
+    do i=istr,iend
       FC(i,k+1)=FC(i,k+1)*We(i,j,k+1)  !<-- Convert interface
     enddo                              !    value into vertical
-  enddo              !--> discard CF   !    flux.
+  enddo                                !    flux.
   do i=istr,iend
     FC(i,nz)=0._8                         ! Set top and bottom
     FC(i,0)=0._8                         ! boundary conditions.
   enddo
+# endif
 #elif defined HSIMT_V
 !
 !  HSIMT vertical advection (Wu and Zhu, 2010) with TVD limiter.

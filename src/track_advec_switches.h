@@ -92,6 +92,16 @@ end if
 
 cpps(is:ie)='SPLINE_TS'
 # endif
+# ifdef LINROOD_PPM
+is=ie+2 ; ie=is+10
+if (ie>max_opt_size) then
+  call error_log%raise_global(&
+  &info=error_info,&
+  &context=sr_name)
+end if
+
+cpps(is:ie)='LINROOD_PPM'
+# endif
 # ifdef NEUMANN_TS
 is=ie+2 ; ie=is+9
 if (ie>max_opt_size) then

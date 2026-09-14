@@ -187,6 +187,12 @@
 ! with AKIMA_V; when neither is set, SPLINE_TS is used.
 #undef HSIMT_V
 
+! Apply Lin (2004) modified PPM monotonicity to SPLINE_TS vertical edges
+! Usage notes: Only active with SPLINE_TS (ignored if HSIMT_V or AKIMA_V).
+! Uses van Leer–limited slopes and Lin's improved full monotonicity constraint
+! (Lin & Rood 1996 / Lin 2004), then upwind edge fluxes.
+#undef LINROOD_PPM
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!! BOUNDARY CONDITIONS !!!!!!!!!!!!!!!!!!!!!!!!!
 

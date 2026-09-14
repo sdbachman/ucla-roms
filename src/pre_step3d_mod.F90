@@ -104,6 +104,9 @@ contains
     real(kind=8), parameter :: hsimt_eps=1.0D-12
     real(kind=8), parameter :: cc1=0.25_8, cc2=0.5_8, cc3=1._8/12._8
 # endif
+# ifdef LINROOD_PPM
+    real(kind=8) :: dm, qmp, qmin, qmax
+# endif
     integer(kind=4) indx, itrc, iAkt
 
 # include "compute_auxiliary_bounds.h"
