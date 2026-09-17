@@ -64,7 +64,7 @@ contains
     integer(kind=4) istr,iend,jstr,jend, i,j,k, icdr, cidx
     real(kind=8) CX(PRIVATE_1D_SCRATCH_ARRAY,0:nz),  dtau, c2d,dh, cw, cff,&
     &wrk(PRIVATE_1D_SCRATCH_ARRAY),      cw_min,cw_max,cw_max2
-    real(kind=8), parameter :: cu_min=0.6D0, cu_max=1.0D0,&
+    real(kind=8), parameter :: cu_min=0.6D0, cu_max=0.8D0,&
     &cmnx_ratio=cu_min/cu_max,  cutoff=2.D0-cmnx_ratio,&
     &r4cmx=0.25D0/(1.D0-cmnx_ratio)
 
