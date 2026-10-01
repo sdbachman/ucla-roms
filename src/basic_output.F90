@@ -637,14 +637,14 @@ contains                  !]
 
     ! local
     integer(kind=4),dimension(4)   :: start
-    integer(kind=4)                :: rec_avg
+    integer(kind=4),save           :: rec_avg                     ! current file output record
     integer(kind=4),save           :: total_rec_avg=0                      ! total avg output records so far
     real(kind=8),save              :: output_time_avg=0                    ! time since last output
     character(len=max_name_size),save :: fname_avg
     character(len=99)      :: output_time_string
     character(len=99)      :: formatted_string
     integer(kind=4) :: tile, tn, ierr, k
-    logical, save          :: first_step
+    logical,save           :: first_step=.true.
 
     if (first_step) then
       rec_avg = nrpf_avg
@@ -675,13 +675,15 @@ contains                  !]
           call MPI_Barrier(ocean_grid_comm, ierr)
         endif
         rec_avg = rec_avg + 1
+        total_rec_avg = total_rec_avg + 1
 
         if (mynode == 0) then
           ierr=nf90_open(fname_avg,nf90_write,ncid)
           call ncwrite(ncid,'ocean_time',(/t_avg_ovars/),(/rec_avg/))
           ierr=nf90_close (ncid)
         endif
-
+        ! abort_check uses MPI collectives; must not run only on rank 0
+        call error_log%abort_check()
         call MPI_Barrier(ocean_grid_comm, ierr)
 
         call pio_open_or_abort(trim(fname_avg), module_name//"/wrt_avg_ocean_vars", PIO_write)
@@ -735,7 +737,6 @@ contains                  !]
         navg_ovars=0
         output_time_avg=0
 
-        ierr=nf90_close(ncid)
         if (mynode == 0) then
           write(*,'(7x,A,1x,F11.4,2x,A,I7,1x,A,I4,A,I4,1x,A,I3)')&  ! confirm work completed
           &'ocean_vars :: wrote averages, tdays =', tdays,&
@@ -748,6 +749,7 @@ contains                  !]
           rec_avg = 0
         endif
         rec_avg = rec_avg + 1
+        total_rec_avg = total_rec_avg + 1
 
         ierr=nf90_open(fname_avg,nf90_write,ncid)
         ierr=nf90_set_fill(ncid, nf90_nofill, prev_fill_mode)
